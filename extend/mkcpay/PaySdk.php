@@ -216,7 +216,6 @@ class PaySdk
     {
         ksort($data);
         $str = json_encode($data);
-        var_dump($str);
         return md5($str);
     }
 
