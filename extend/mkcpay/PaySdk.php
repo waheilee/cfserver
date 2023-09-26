@@ -7,7 +7,7 @@
  */
 
 //墨西哥
-namespace extend\mkcpay;
+namespace mkcpay;
 
 use app\model\BankDB;
 use app\model\GameOC;
