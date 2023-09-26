@@ -54,7 +54,7 @@ class PaySdk
         $apiUrl = $this->apiUrl;
         $appid = $this->appid;//'eex831ooqizli';
         $orderId = (string)$param['orderid'];
-        $amount = (int)$param['amount'];
+        $amount = (int)$param['amount'] * 100;
 
         $data = [
             'amount' => $amount,
