@@ -15,7 +15,6 @@ class PayNotify extends Controller
             if (strpos($action,'_')) {
     			$channel_code  = strtolower(explode('_', $action)[0]);
     			$action        = explode('_', $action)[1];
-    			var_dump($action);die();
     			$class = '\\'.$channel_code.'\PaySdk';
     			$pay   = new $class();
 

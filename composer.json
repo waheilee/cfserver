@@ -19,7 +19,10 @@
     "php": ">=7.3.0",
     "topthink/framework": "5.1.*",
     "phpmailer/phpmailer": "^6.6",
-    "ext-json": "*"
+    "ext-json": "*",
+    "ext-curl": "*",
+    "ext-openssl": "*",
+    "starkbank/ecdsa": "^2.0"
   },
   "autoload": {
     "psr-4": {
@@ -30,6 +33,9 @@
     "think-path": "thinkphp"
   },
   "config": {
-    "preferred-install": "dist"
+    "preferred-install": "dist",
+    "allow-plugins": {
+      "topthink/think-installer": true
+    }
   }
 }
