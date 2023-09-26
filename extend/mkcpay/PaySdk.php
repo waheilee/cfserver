@@ -13,6 +13,8 @@ use app\model\BankDB;
 use app\model\GameOC;
 use app\model\MasterDB;
 use app\model\UserDB;
+use EllipticCurve\Ecdsa;
+use EllipticCurve\PrivateKey;
 
 //use mkcpay\Exception;
 
@@ -256,9 +258,9 @@ class PaySdk
         $privateKey .= "\n-----END EC PRIVATE KEY-----\n";
 
 # Generate privateKey from PEM string
-        $privateKey = \EllipticCurve\PrivateKey::fromPem($privateKey);
+        $privateKey = PrivateKey::fromPem($privateKey);
 
-        $signature = \EllipticCurve\Ecdsa::sign($data, $privateKey);
+        $signature = Ecdsa::sign($data, $privateKey);
 
 // Generate Signature in base64. This result can be sent to Stark Bank in header as Digital-Signature parameter
         return $signature->toBase64();
@@ -272,6 +274,6 @@ class PaySdk
         $publicKey .= "\n-----END PUBLIC KEY-----\n";
 
         $message = md5($data);
-        return \EllipticCurve\Ecdsa::verify($message, $signature, $publicKey);
+        return Ecdsa::verify($message, $signature, $publicKey);
     }
 }
