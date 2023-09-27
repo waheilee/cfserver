@@ -46,7 +46,12 @@ class PayNotify extends Controller
                 }
                 $channel = json_decode($channel_all['MerchantDetail'],true);
                 $channel['ChannelId'] = $channel_all['ChannelId'];
-    			$pay->$action($params,$header,$channel,$channel_code);
+                if ($channel_code == 'mkcpay'){
+                    $pay->$action(file_get_contents('php://input'),$header,$channel,$channel_code);
+                }else{
+                    $pay->$action($params,$header,$channel,$channel_code);
+                }
+
             } else {
             	exit('fail');
             }

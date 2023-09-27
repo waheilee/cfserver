@@ -18,6 +18,7 @@ use EllipticCurve\PrivateKey;
 use EllipticCurve\PublicKey;
 use EllipticCurve\Signature;
 use EllipticCurve\Utils\File;
+
 //use mkcpay\Exception;
 
 class PaySdk
@@ -25,7 +26,7 @@ class PaySdk
     private $merchant;
     private $appid;
     private $secret;
-    private $apiUrl ;
+    private $apiUrl;
 
     public function __construct()
     {
@@ -34,7 +35,6 @@ class PaySdk
         $this->secret = '';
         $this->apiUrl = 'https://doc.mkcpay.com/api/pay/v1/mkcPay/createBrCode';
     }
-
 
 
     public function pay($param, $config = [])
@@ -83,7 +83,7 @@ class PaySdk
         //    "code": 200
         //}
 
-        $result = $this->curl_post_content($apiUrl,json_encode($data) , $header);
+        $result = $this->curl_post_content($apiUrl, json_encode($data), $header);
         save_log('mkcpay', '提交参数:' . json_encode($data) . ',接口返回信息：' . $result);
         $res = json_decode($result, true);
         $resultData = '';
@@ -96,6 +96,7 @@ class PaySdk
     //回调地址 /client/Pay_Notify/templatepay_notify
     public function notify($params, $header, $channel, $logname)
     {
+
         //{
         //"createTime":1690352033545,
         //"event":"transfer",
@@ -111,54 +112,40 @@ class PaySdk
         //"taxId":"xxx"
         //}
         //}
-//        try {
-            //参数
-            $sign = $header['digital-signature'] ?? '';
-            $data['json'] = json_encode($params);
-            $log = $params['log'];
-            $data['orderid'] = $log['externalOrderNo'] ?? '';   //平台内部订单号
-            $data['realmoney'] = $log['actualAmount'] ?? '';
-            $data['transactionId'] = $log['orderNo'] ?? '';    //三方订单号
-            $data['code'] = $log['status'];
-            $data['status'] = $log['status'] ?? '' == 'success' ? 1 : 0;
+        try {
+        //参数
+        $sign = $header['digital-signature'] ?? '';
+        $checkSign = $this->verify($params, $sign);
+        $json = json_decode($params,1);
+        $log = $json['log'];
+        $data['orderid'] = $log['externalOrderNo'] ?? '';   //平台内部订单号
+        $data['realmoney'] = $log['actualAmount'] ?? '';
+        $data['transactionId'] = $log['orderNo'] ?? '';    //三方订单号
+        $data['code'] = $log['status'];
+        $data['status'] = $log['status'] ?? '' == 'success' ? 1 : 0;
 
-
-
-            $order = (new UserDB())->getTableRow('T_UserChannelPayOrder', ['OrderId' => $data['orderid']], '*');
-            $order['ChannelID'] = $order['ChannelID'] ?? 0;
-            // if ($order['ChannelID'] != $channel['ChannelId']) {
-            $channel_all = (new MasterDB())->getTableRow('T_GamePayChannel', ['channelID' => $order['ChannelID']], '*');
-            if (empty($channel_all)) {
-                exit('fail:Channel Not Exist');
-            }
-            $channel = json_decode($channel_all['MerchantDetail'], true);
-            $channel['ChannelId'] = $channel_all['ChannelId'];
-            // }
-
-            $checkSign = $this->verify($data['json'],$sign);
-            var_dump($checkSign);die();
-            if($checkSign){
-                $sign = 1;
-                $checkSign = 1;
-            }else{
-                $text = "sign error"; //签名失败 Signature failed
-                $gameoc = new GameOC();
-                $errorData = [
-                    'OrderId' => $data['orderid'],
-                    'Controller' => 'Notify',
-                    'Method' => __METHOD__,
-                    'Parameter' =>  $data['json'],
-                    'Error' => $text,
-                    'AddTime' => date('Y-m-d H:i:s', time())
-                ];
-                $gameoc->PaynotifyLog()->insert($errorData);
-                exit($text);
-            }
-            (new \paynotify\PayNotify('OK'))->notify($data, $sign, $checkSign, $channel, $logname);
-//        } catch (\Exception $ex) {
-//            save_log($logname, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
-//            exit('fail');
-//        }
+        if ($checkSign) {
+            $sign = 1;
+            $checkSign = 1;
+        } else {
+            $text = "sign error"; //签名失败 Signature failed
+            $gameoc = new GameOC();
+            $errorData = [
+                'OrderId' => $data['orderid'],
+                'Controller' => 'Notify',
+                'Method' => __METHOD__,
+                'Parameter' => $data['json'],
+                'Error' => $text,
+                'AddTime' => date('Y-m-d H:i:s', time())
+            ];
+            $gameoc->PaynotifyLog()->insert($errorData);
+            exit($text);
+        }
+        (new \paynotify\PayNotify('OK'))->notify($data, $sign, $checkSign, $channel, $logname);
+        } catch (\Exception $ex) {
+            save_log($logname, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
+            exit('fail');
+        }
     }
 
     //回调地址 /client/Pay_Notify/templatepay_outnotify
@@ -168,38 +155,27 @@ class PaySdk
         try {
             //参数
             $sign = $header['digital-signature'] ?? '';
-            $data['json'] = json_encode($params);
-            $log = $params['log'];
+            $checkSign = $this->verify($params, $sign);
+            $json = json_decode($params,1);
+            $log = $json['log'];
             $data['orderid'] = $log['externalOrderNo'] ?? '';   //平台内部订单号
             $data['realmoney'] = $log['actualAmount'] ?? '';
             $data['transactionId'] = $log['orderNo'] ?? '';    //三方订单号
             $data['code'] = $log['status'];
             $data['status'] = $log['status'] ?? '' == 'success' ? 1 : 0;
 
-
-            $order = (new BankDB())->getTableRow('UserDrawBack', ['OrderNo' => $data['orderid']], '*');
-            $order['ChannelId'] = $order['ChannelId'] ?? 0;
-
-            $channel_all = (new MasterDB())->getTableRow('T_GamePayChannel', ['channelID' => $order['ChannelId']], '*');
-
-            if (empty($channel_all)) {
-                exit('fail:Channel Not Exist');
-            }
-            $channel = json_decode($channel_all['MerchantDetail'], true);
-            $channel['ChannelId'] = $channel_all['ChannelId'];
-
-            $checkSign = $this->verify($data['json'],$sign);
-            if($checkSign){
+//            $checkSign = $this->verify($data['json'], $sign);
+            if ($checkSign) {
                 $sign = 1;
                 $checkSign = 1;
-            }else{
+            } else {
                 $text = "sign error"; //签名失败 Signature failed
                 $gameoc = new GameOC();
                 $data = [
                     'OrderId' => $data['orderid'],
                     'Controller' => 'Notify',
                     'Method' => __METHOD__,
-                    'Parameter' =>  $data['json'],
+                    'Parameter' => $data['json'],
                     'Error' => $text,
                     'AddTime' => date('Y-m-d H:i:s', time())
                 ];
@@ -268,7 +244,7 @@ class PaySdk
         return $signature->toBase64();
     }
 
-    public function verify($data,$sig)
+    public function verify($data, $sig)
     {
         $key = 'MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEvu/hRO4QX13bhA9kklW/t35AQld130l+a8Uqfeh8iypFzI+QgMrdVOuXqoRrzpgBPlk3Tmm4OPYnrz0v/rAiCg==';
         $publicKeyPem = "-----BEGIN PUBLIC KEY-----\n";
@@ -276,7 +252,6 @@ class PaySdk
         $publicKeyPem .= "\n-----END PUBLIC KEY-----\n";
         $publicKey = PublicKey::fromPem($publicKeyPem);
         $signature = Signature::fromBase64($sig);
-
         return Ecdsa::verify($data, $signature, $publicKey);
     }
 }
