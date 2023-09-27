@@ -10,7 +10,7 @@ class PayNotify extends Controller
     public function _empty()
     {
 
-//        try {
+        try {
             $action = strtolower($this->request->action());
             if (strpos($action,'_')) {
     			$channel_code  = strtolower(explode('_', $action)[0]);
@@ -50,9 +50,9 @@ class PayNotify extends Controller
             } else {
             	exit('fail');
             }
-//        } catch (Exception $ex) {
-//            save_log(strtolower(explode('_', strtolower($this->request->action()))[0]), 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
-//            exit('fail');
-//        }
+        } catch (Exception $ex) {
+            save_log(strtolower(explode('_', strtolower($this->request->action()))[0]), 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
+            exit('fail');
+        }
     }
 }
