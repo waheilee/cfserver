@@ -140,7 +140,7 @@ class PaySdk
             }else{
                 $text = "sign error"; //签名失败 Signature failed
                 $gameoc = new GameOC();
-                $data = [
+                $errorData = [
                     'OrderId' => $data['orderid'],
                     'Controller' => 'Notify',
                     'Method' => __METHOD__,
@@ -148,7 +148,7 @@ class PaySdk
                     'Error' => $text,
                     'AddTime' => date('Y-m-d H:i:s', time())
                 ];
-                $gameoc->PaynotifyLog()->insert($data);
+                $gameoc->PaynotifyLog()->insert($errorData);
                 exit($text);
             }
             (new \paynotify\PayNotify('OK'))->notify($data, $sign, $checkSign, $channel, $logname);

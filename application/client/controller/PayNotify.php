@@ -37,6 +37,7 @@ class PayNotify extends Controller
                     exit('fail:Empty Request');
                 }
                 $header = $this->request->header();
+                save_log('mkcpay', '回调header参数:' . json_encode($header));
                 $where   .= " and (ChannelCode='".$channel_code."' or ChannelCode='".ucwords($channel_code)."' or ChannelCode='".strtoupper($channel_code)."')";
 
                 $channel_all = (new \app\model\MasterDB())->getTableRow('T_GamePayChannel', $where, '*');
