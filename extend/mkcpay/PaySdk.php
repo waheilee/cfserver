@@ -15,7 +15,9 @@ use app\model\MasterDB;
 use app\model\UserDB;
 use EllipticCurve\Ecdsa;
 use EllipticCurve\PrivateKey;
-
+use EllipticCurve\PublicKey;
+use EllipticCurve\Signature;
+use EllipticCurve\Utils\File;
 //use mkcpay\Exception;
 
 class PaySdk
@@ -109,7 +111,7 @@ class PaySdk
         //"taxId":"xxx"
         //}
         //}
-        try {
+//        try {
             //参数
             $sign = $header['digital-signature'] ?? '';
             $data['json'] = json_encode($params);
@@ -134,6 +136,7 @@ class PaySdk
             // }
 
             $checkSign = $this->verify($data['json'],$sign);
+            var_dump($checkSign);die();
             if($checkSign){
                 $sign = 1;
                 $checkSign = 1;
@@ -152,10 +155,10 @@ class PaySdk
                 exit($text);
             }
             (new \paynotify\PayNotify('OK'))->notify($data, $sign, $checkSign, $channel, $logname);
-        } catch (\Exception $ex) {
-            save_log($logname, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
-            exit('fail');
-        }
+//        } catch (\Exception $ex) {
+//            save_log($logname, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
+//            exit('fail');
+//        }
     }
 
     //回调地址 /client/Pay_Notify/templatepay_outnotify
@@ -265,14 +268,15 @@ class PaySdk
         return $signature->toBase64();
     }
 
-    public function verify($data,$signature)
+    public function verify($data,$sig)
     {
         $key = 'MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEvu/hRO4QX13bhA9kklW/t35AQld130l+a8Uqfeh8iypFzI+QgMrdVOuXqoRrzpgBPlk3Tmm4OPYnrz0v/rAiCg==';
-        $publicKey = "-----BEGIN PUBLIC KEY-----\n";
-        $publicKey .= wordwrap($key, 64, "\n", true);
-        $publicKey .= "\n-----END PUBLIC KEY-----\n";
+        $publicKeyPem = "-----BEGIN PUBLIC KEY-----\n";
+        $publicKeyPem .= wordwrap($key, 64, "\n", true);
+        $publicKeyPem .= "\n-----END PUBLIC KEY-----\n";
+        $publicKey = PublicKey::fromPem($publicKeyPem);
+        $signature = Signature::fromBase64($sig);
 
-        $message = md5($data);
-        return Ecdsa::verify($message, $signature, $publicKey);
+        return Ecdsa::verify($data, $signature, $publicKey);
     }
 }
