@@ -11,6 +11,7 @@ namespace mkcpay;
 
 
 use app\model\GameOC;
+use app\model\UserDB;
 use EllipticCurve\Ecdsa;
 use EllipticCurve\PrivateKey;
 use EllipticCurve\PublicKey;
@@ -115,10 +116,10 @@ class PaySdk
         $json = json_decode($params,1);
         $log = $json['log'];
         $data['orderid'] = $log['externalOrderNo'] ?? '';   //平台内部订单号
-        $data['realmoney'] = $log['actualAmount'] ?? '';
         $data['transactionId'] = $log['orderNo'] ?? '';    //三方订单号
         $data['code'] = $log['status'];
         $data['status'] = $log['status'] ?? '' == 'success' ? 1 : 0;
+
         save_log('mkcpay', '验签结果:' . json_encode($checkSign));
         if ($checkSign) {
             $sign = 1;
@@ -142,6 +143,9 @@ class PaySdk
             'check' => $checkSign
         ];
             save_log('mkcpay', '验签参数:' . json_encode($signCheck));
+            $userDB = new UserDB();
+            $order = $userDB->getTableObject('T_UserChannelPayOrder')->where('OrderId',$data['orderid'])->find();
+            $data['realmoney'] = $order['RealMoney'];
         (new \paynotify\PayNotify('OK'))->notify($data, $sign, $checkSign, $channel, $logname);
         } catch (\Exception $ex) {
             save_log($logname, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
@@ -161,7 +165,6 @@ class PaySdk
             $json = json_decode($params,1);
             $log = $json['log'];
             $data['orderid'] = $log['externalOrderNo'] ?? '';   //平台内部订单号
-            $data['realmoney'] = $log['actualAmount'] ?? '';
             $data['transactionId'] = $log['orderNo'] ?? '';    //三方订单号
             $data['code'] = $log['status'];
             $data['status'] = $log['status'] ?? '' == 'success' ? 1 : 0;
@@ -184,7 +187,9 @@ class PaySdk
                 $gameoc->PaynotifyLog()->insert($data);
                 exit($text);
             }
-
+            $userDB = new UserDB();
+            $order = $userDB->getTableObject('T_UserChannelPayOrder')->where('OrderId',$data['orderid'])->find();
+            $data['realmoney'] = $order['RealMoney'];
             (new \paynotify\PayNotify('OK'))->outnotify($data, $sign, $checkSign, $channel, $logname);
         } catch (\Exception $ex) {
             save_log($logname, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
