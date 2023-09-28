@@ -248,6 +248,11 @@ class PaySdk
 
     public function verify($data, $sig)
     {
+        $pram = [
+            'data' => "$data",
+            'sig' => $sig
+        ];
+        save_log('mkcpay', '验证参数:' . json_encode($pram));
         $key = 'MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEvu/hRO4QX13bhA9kklW/t35AQld130l+a8Uqfeh8iypFzI+QgMrdVOuXqoRrzpgBPlk3Tmm4OPYnrz0v/rAiCg==';
         $publicKeyPem = "-----BEGIN PUBLIC KEY-----\n";
         $publicKeyPem .= wordwrap($key, 64, "\n", true);
