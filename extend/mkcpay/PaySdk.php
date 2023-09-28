@@ -119,7 +119,7 @@ class PaySdk
         $data['transactionId'] = $log['orderNo'] ?? '';    //三方订单号
         $data['code'] = $log['status'];
         $data['status'] = $log['status'] ?? '' == 'success' ? 1 : 0;
-
+        save_log('mkcpay', '验签结果:' . json_encode($checkSign));
         if ($checkSign) {
             $sign = 1;
             $checkSign = 1;
