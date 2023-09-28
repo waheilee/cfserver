@@ -137,6 +137,11 @@ class PaySdk
             $gameoc->PaynotifyLog()->insert($errorData);
             exit($text);
         }
+        $signCheck = [
+            'sign' => $sign,
+            'check' => $checkSign
+        ];
+            save_log('mkcpay', '验签参数:' . json_encode($signCheck));
         (new \paynotify\PayNotify('OK'))->notify($data, $sign, $checkSign, $channel, $logname);
         } catch (\Exception $ex) {
             save_log($logname, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
