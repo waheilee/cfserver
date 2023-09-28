@@ -9,17 +9,12 @@
 //墨西哥
 namespace mkcpay;
 
-use app\model\BankDB;
+
 use app\model\GameOC;
-use app\model\MasterDB;
-use app\model\UserDB;
 use EllipticCurve\Ecdsa;
 use EllipticCurve\PrivateKey;
 use EllipticCurve\PublicKey;
 use EllipticCurve\Signature;
-use EllipticCurve\Utils\File;
-
-//use mkcpay\Exception;
 
 class PaySdk
 {
