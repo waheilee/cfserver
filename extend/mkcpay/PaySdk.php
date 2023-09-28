@@ -10,6 +10,7 @@
 namespace mkcpay;
 
 
+use app\model\BankDB;
 use app\model\GameOC;
 use app\model\UserDB;
 use EllipticCurve\Ecdsa;
@@ -187,9 +188,9 @@ class PaySdk
                 $gameoc->PaynotifyLog()->insert($data);
                 exit($text);
             }
-            $userDB = new UserDB();
-            $order = $userDB->getTableObject('T_UserChannelPayOrder')->where('OrderId',$data['orderid'])->find();
-            $data['realmoney'] = $order['RealMoney'];
+            $userDB = new BankDB();
+            $order = $userDB->getTableObject('UserDrawBack')->where('OrderNo',$data['orderid'])->find();
+            $data['realmoney'] = $order['iMoney'];
             (new \paynotify\PayNotify('OK'))->outnotify($data, $sign, $checkSign, $channel, $logname);
         } catch (\Exception $ex) {
             save_log($logname, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
