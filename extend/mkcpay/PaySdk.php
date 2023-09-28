@@ -116,6 +116,7 @@ class PaySdk
         //参数
         $sign = $header['digital-signature'] ?? '';
         $checkSign = $this->verify($params, $sign);
+        $data['json'] = $params;
         $json = json_decode($params,1);
         $log = $json['log'];
         $data['orderid'] = $log['externalOrderNo'] ?? '';   //平台内部订单号
@@ -156,6 +157,7 @@ class PaySdk
             //参数
             $sign = $header['digital-signature'] ?? '';
             $checkSign = $this->verify($params, $sign);
+            $data['json'] = $params;
             $json = json_decode($params,1);
             $log = $json['log'];
             $data['orderid'] = $log['externalOrderNo'] ?? '';   //平台内部订单号
