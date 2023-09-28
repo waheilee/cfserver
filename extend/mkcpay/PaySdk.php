@@ -248,17 +248,12 @@ class PaySdk
 
     public function verify($data, $sig)
     {
-        $pram = [
-            'data' => "$data",
-            'sig' => $sig
-        ];
-        save_log('mkcpay', '验证参数:' . json_encode($pram));
         $key = 'MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEvu/hRO4QX13bhA9kklW/t35AQld130l+a8Uqfeh8iypFzI+QgMrdVOuXqoRrzpgBPlk3Tmm4OPYnrz0v/rAiCg==';
         $publicKeyPem = "-----BEGIN PUBLIC KEY-----\n";
         $publicKeyPem .= wordwrap($key, 64, "\n", true);
         $publicKeyPem .= "\n-----END PUBLIC KEY-----\n";
         $publicKey = PublicKey::fromPem($publicKeyPem);
         $signature = Signature::fromBase64($sig);
-        return Ecdsa::verify($data, $signature, $publicKey);
+        return Ecdsa::verify(trim($data), $signature, $publicKey);
     }
 }
