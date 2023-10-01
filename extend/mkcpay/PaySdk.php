@@ -165,6 +165,7 @@ class PaySdk
             $data['json'] = $params;
             $json = json_decode($params,1);
             $log = $json['log'];
+            $data['realmoney'] = $log['actualAmount'] ?? '';   //订单金额
             $data['orderid'] = $log['externalOrderNo'] ?? '';   //平台内部订单号
             $data['transactionId'] = $log['orderNo'] ?? '';    //三方订单号
             $data['code'] = $log['status'];
@@ -188,9 +189,6 @@ class PaySdk
                 $gameoc->PaynotifyLog()->insert($data);
                 exit($text);
             }
-            $userDB = new BankDB();
-            $order = $userDB->getTableObject('UserDrawBack')->where('OrderNo',$data['orderid'])->find();
-            $data['realmoney'] = $order['iMoney'];
             (new \paynotify\PayNotify('OK'))->outnotify($data, $sign, $checkSign, $channel, $logname);
         } catch (\Exception $ex) {
             save_log($logname, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
