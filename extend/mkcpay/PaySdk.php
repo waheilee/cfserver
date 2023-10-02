@@ -171,8 +171,11 @@ class PaySdk
             $data['transactionId'] = $log['orderNo'] ?? '';    //三方订单号
             $data['code'] = $log['status'];
             $data['status'] = $log['status'] ?? '' == 'success' ? 1 : 0;
-
-//            $checkSign = $this->verify($data['json'], $sign);
+            if($data['code'] == "failed"  || $data['code'] == "canceled"){
+                $data['status'] = '2';
+            }
+            save_log('mkcpay', '订单状态:----' . $data['status']);
+            //            $checkSign = $this->verify($data['json'], $sign);
             if ($checkSign) {
                 $sign = 1;
                 $checkSign = 1;
@@ -189,9 +192,7 @@ class PaySdk
                 $gameoc->PaynotifyLog()->insert($errorData);
                 exit($text);
             }
-            if($data['code'] == "failed"  || $data['code'] == "canceled"){
-                $data['status'] = '2';
-            }
+
             (new \paynotify\PayNotify('OK'))->outnotify($data, $sign, $checkSign, $channel, $logname);
         } catch (\Exception $ex) {
             save_log($logname, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
