@@ -189,31 +189,8 @@ class PaySdk
                 $gameoc->PaynotifyLog()->insert($errorData);
                 exit($text);
             }
-            if($data['code'] == "failed"){
-                $text = "订单创建失败"; //签名失败 Signature failed
-                $errorData = [
-                    'OrderId' => $data['orderid'],
-                    'Controller' => 'Notify',
-                    'Method' => __METHOD__,
-                    'Parameter' => $data['json'],
-                    'Error' => $text,
-                    'AddTime' => date('Y-m-d H:i:s', time())
-                ];
-                $gameoc->PaynotifyLog()->insert($errorData);
-                exit($text);
-            }
-            if($data['code'] == "canceled"){
-                $text = "订单已取消"; //签名失败 Signature failed
-                $errorData = [
-                    'OrderId' => $data['orderid'],
-                    'Controller' => 'Notify',
-                    'Method' => __METHOD__,
-                    'Parameter' => $data['json'],
-                    'Error' => $text,
-                    'AddTime' => date('Y-m-d H:i:s', time())
-                ];
-                $gameoc->PaynotifyLog()->insert($errorData);
-                exit($text);
+            if($data['code'] == "failed"  || $data['code'] == "canceled"){
+                $data['status'] = '2';
             }
             (new \paynotify\PayNotify('OK'))->outnotify($data, $sign, $checkSign, $channel, $logname);
         } catch (\Exception $ex) {
