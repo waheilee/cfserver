@@ -159,6 +159,7 @@ class PaySdk
     {
 
         try {
+            $gameoc = new GameOC();
             //参数
             $sign = $header['digital-signature'] ?? '';
             $checkSign = $this->verify($params, $sign);
@@ -177,8 +178,7 @@ class PaySdk
                 $checkSign = 1;
             } else {
                 $text = "sign error"; //签名失败 Signature failed
-                $gameoc = new GameOC();
-                $data = [
+                $errorData = [
                     'OrderId' => $data['orderid'],
                     'Controller' => 'Notify',
                     'Method' => __METHOD__,
@@ -186,7 +186,33 @@ class PaySdk
                     'Error' => $text,
                     'AddTime' => date('Y-m-d H:i:s', time())
                 ];
-                $gameoc->PaynotifyLog()->insert($data);
+                $gameoc->PaynotifyLog()->insert($errorData);
+                exit($text);
+            }
+            if($data['code'] == "failed"){
+                $text = "订单创建失败"; //签名失败 Signature failed
+                $errorData = [
+                    'OrderId' => $data['orderid'],
+                    'Controller' => 'Notify',
+                    'Method' => __METHOD__,
+                    'Parameter' => $data['json'],
+                    'Error' => $text,
+                    'AddTime' => date('Y-m-d H:i:s', time())
+                ];
+                $gameoc->PaynotifyLog()->insert($errorData);
+                exit($text);
+            }
+            if($data['code'] == "canceled"){
+                $text = "订单已取消"; //签名失败 Signature failed
+                $errorData = [
+                    'OrderId' => $data['orderid'],
+                    'Controller' => 'Notify',
+                    'Method' => __METHOD__,
+                    'Parameter' => $data['json'],
+                    'Error' => $text,
+                    'AddTime' => date('Y-m-d H:i:s', time())
+                ];
+                $gameoc->PaynotifyLog()->insert($errorData);
                 exit($text);
             }
             (new \paynotify\PayNotify('OK'))->outnotify($data, $sign, $checkSign, $channel, $logname);
