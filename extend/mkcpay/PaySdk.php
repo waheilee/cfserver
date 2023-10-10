@@ -28,7 +28,7 @@ class PaySdk
     public function __construct()
     {
         $this->merchant = '';
-        $this->appid = 'eex831ooqizli';
+        $this->appid = '';
         $this->secret = '';
         $this->apiUrl = 'https://doc.mkcpay.com/api/pay/v1/mkcPay/createBrCode';
     }
