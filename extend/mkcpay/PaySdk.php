@@ -25,12 +25,11 @@ class PaySdk
 
     private $apiUrl;
     private $privateKey;
-    private $publicKey;
+
 
     public function __construct()
     {
         $this->privateKey = '';
-        $this->publicKey = '';
         $this->appid = '';
         $this->apiUrl = 'https://doc.mkcpay.com/api/pay/v1/mkcPay/createBrCode';
     }
@@ -49,9 +48,7 @@ class PaySdk
         if (!empty($config['private_key'])) {
             $this->privateKey = $config['private_key'];
         }
-        if (!empty($config['apiurl'])) {
-            $this->publicKey = $config['public_key'];
-        }
+
 
         $apiUrl = $this->apiUrl;
         $appid = $this->appid;
