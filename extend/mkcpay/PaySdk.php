@@ -24,9 +24,13 @@ class PaySdk
     private $appid;
 
     private $apiUrl;
+    private $privateKey;
+    private $publicKey;
 
     public function __construct()
     {
+        $this->privateKey = '';
+        $this->publicKey = '';
         $this->appid = '';
         $this->apiUrl = 'https://doc.mkcpay.com/api/pay/v1/mkcPay/createBrCode';
     }
@@ -42,6 +46,12 @@ class PaySdk
         if (!empty($config['apiurl'])) {
             $this->apiUrl = $config['apiurl'];
         }
+        if (!empty($config['private_key'])) {
+            $this->privateKey = $config['private_key'];
+        }
+        if (!empty($config['apiurl'])) {
+            $this->publicKey = $config['public_key'];
+        }
 
         $apiUrl = $this->apiUrl;
         $appid = $this->appid;
@@ -54,7 +64,7 @@ class PaySdk
         ];
 
         $dataMd5 = $this->ksrotArrayMd5($data);
-        $sign = $this->encry($dataMd5);
+        $sign = $this->encry($dataMd5,$this->privateKey);
         $header = [
             'Content-Type: application/json; charset=utf-8',
             'sign:' . $sign,
@@ -102,10 +112,13 @@ class PaySdk
         //"taxId":"xxx"
         //}
         //}
+
         try {
+
             //参数
+            $publicKeyConfig = $channel['public_key'];
             $sign = $header['digital-signature'] ?? '';
-            $checkSign = $this->verify($params, $sign);
+            $checkSign = $this->verify($params, $sign, $publicKeyConfig);
             $data['json'] = $params;
             $json = json_decode($params, 1);
             $log = $json['log'];
@@ -154,8 +167,9 @@ class PaySdk
         try {
             $gameoc = new GameOC();
             //参数
+            $publicKeyConfig = $channel['public_key'];
             $sign = $header['digital-signature'] ?? '';
-            $checkSign = $this->verify($params, $sign);
+            $checkSign = $this->verify($params, $sign, $publicKeyConfig);
             $data['json'] = $params;
             $json = json_decode($params, 1);
             $log = $json['log'];
@@ -230,12 +244,12 @@ class PaySdk
     /**
      * 加密
      */
-    public function encry($data)
+    public function encry($data,$privateKeyConfig)
     {
-        $key = 'MHUCAQEEIRgDFg6d7/rz9qBOiFnTyLCT4p6yw3fhQR+qKmsJpTMjxKAHBgUrgQQACqFEA0IABL7v4UTuEF9d24QPZJJVv7d+QEJXdd9JfmvFKn3ofIsqRcyPkIDK3VTrl6qEa86YAT5ZN05puDj2J689L/6wIgo=';
+        //$key = 'MHUCAQEEIRgDFg6d7/rz9qBOiFnTyLCT4p6yw3fhQR+qKmsJpTMjxKAHBgUrgQQACqFEA0IABL7v4UTuEF9d24QPZJJVv7d+QEJXdd9JfmvFKn3ofIsqRcyPkIDK3VTrl6qEa86YAT5ZN05puDj2J689L/6wIgo=';
 
         $privateKey = "-----BEGIN EC PRIVATE KEY-----\n";
-        $privateKey .= wordwrap($key, 64, "\n", true);
+        $privateKey .= wordwrap($privateKeyConfig, 64, "\n", true);
         $privateKey .= "\n-----END EC PRIVATE KEY-----\n";
 
 # Generate privateKey from PEM string
@@ -247,11 +261,12 @@ class PaySdk
         return $signature->toBase64();
     }
 
-    public function verify($data, $sig)
+    public function verify($data, $sig, $publicKeyConfig)
     {
-        $key = 'MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEvu/hRO4QX13bhA9kklW/t35AQld130l+a8Uqfeh8iypFzI+QgMrdVOuXqoRrzpgBPlk3Tmm4OPYnrz0v/rAiCg==';
+//        $key = 'MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEvu/hRO4QX13bhA9kklW/t35AQld130l+a8Uqfeh8iypFzI+QgMrdVOuXqoRrzpgBPlk3Tmm4OPYnrz0v/rAiCg==';
+
         $publicKeyPem = "-----BEGIN PUBLIC KEY-----\n";
-        $publicKeyPem .= wordwrap($key, 64, "\n", true);
+        $publicKeyPem .= wordwrap($publicKeyConfig, 64, "\n", true);
         $publicKeyPem .= "\n-----END PUBLIC KEY-----\n";
         $publicKey = PublicKey::fromPem($publicKeyPem);
         $signature = Signature::fromBase64($sig);
