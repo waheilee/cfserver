@@ -142,11 +142,7 @@ class PaySdk
                 $gameoc->PaynotifyLog()->insert($errorData);
                 exit($text);
             }
-            $signCheck = [
-                'sign' => $sign,
-                'check' => $checkSign
-            ];
-            save_log('mkcpay', '验签参数:' . json_encode($signCheck));
+
             $userDB = new UserDB();
             $order = $userDB->getTableObject('T_UserChannelPayOrder')->where('OrderId', $data['orderid'])->find();
             $data['realmoney'] = $order['RealMoney'];

@@ -90,6 +90,22 @@ class Index extends Base
                 }
             }
 
+            //判断用户是否有当日充值，如果没有则不予领取
+            $configDailyRecharge = $masterDB->getTableObject('T_GameConfig')
+                ->where('CfgType', 303)
+                ->value('CfgValue');//当日是否有充值
+
+            if (!empty($configDailyRecharge)) {
+                $userDB = new UserDB();
+                $extRecharge = $userDB->getTableObject('T_UserChannelPayOrder')
+                    ->where('AccountID',$account_info['AccountID'])
+                    ->where('PayTime', '<', date('Y-m-d 23:59:59'))
+                    ->select();
+                if ($extRecharge) {
+                    return $this->failJSON('Não foi recarregado hoje e não pode ser coletado.');
+                }
+            }
+
             //需要充值才能领取
             if ($active_info['NeedCharge'] == 1) {
                 $userdb = new UserDB();
