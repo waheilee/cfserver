@@ -20,38 +20,31 @@ use EllipticCurve\Signature;
 
 class PaySdk
 {
-    private $merchant;
+
     private $appid;
-    private $secret;
+
     private $apiUrl;
 
     public function __construct()
     {
-        $this->merchant = '';
         $this->appid = '';
-        $this->secret = '';
         $this->apiUrl = 'https://doc.mkcpay.com/api/pay/v1/mkcPay/createBrCode';
     }
 
 
     public function pay($param, $config = [])
     {
-        if (isset($config['merchant']) && !empty($config['merchant'])) {
-            $this->merchant = $config['merchant'];
-        }
-        if (isset($config['appid']) && !empty($config['appid'])) {
+
+        if (!empty($config['appid'])) {
             $this->appid = $config['appid'];
         }
-        if (isset($config['secret']) && !empty($config['secret'])) {
-            $this->secret = $config['secret'];
-        }
-        if (isset($config['apiurl']) && !empty($config['apiurl'])) {
+
+        if (!empty($config['apiurl'])) {
             $this->apiUrl = $config['apiurl'];
         }
-        $merchant = $this->merchant;//10079;
-        $secret = $this->secret;
+
         $apiUrl = $this->apiUrl;
-        $appid = $this->appid;//'eex831ooqizli';
+        $appid = $this->appid;
         $orderId = (string)$param['orderid'];
         $amount = (int)$param['amount'] * 100;
 
@@ -81,7 +74,7 @@ class PaySdk
         //}
 
         $result = $this->curl_post_content($apiUrl, json_encode($data), $header);
-        save_log('mkcpay', '提交参数:' . json_encode($data) . ',接口返回信息：' . $result);
+        save_log('mkcpay', '头部信息:' . json_encode($header) . '提交参数:' . json_encode($data) . ',接口返回信息：' . $result);
         $res = json_decode($result, true);
         $resultData = '';
         if (isset($res['result']) && $res['code'] == 200) {
@@ -110,44 +103,44 @@ class PaySdk
         //}
         //}
         try {
-        //参数
-        $sign = $header['digital-signature'] ?? '';
-        $checkSign = $this->verify($params, $sign);
-        $data['json'] = $params;
-        $json = json_decode($params,1);
-        $log = $json['log'];
-        $data['orderid'] = $log['externalOrderNo'] ?? '';   //平台内部订单号
-        $data['transactionId'] = $log['orderNo'] ?? '';    //三方订单号
-        $data['code'] = $log['status'];
-        $data['status'] = $log['status'] ?? '' == 'success' ? 1 : 0;
+            //参数
+            $sign = $header['digital-signature'] ?? '';
+            $checkSign = $this->verify($params, $sign);
+            $data['json'] = $params;
+            $json = json_decode($params, 1);
+            $log = $json['log'];
+            $data['orderid'] = $log['externalOrderNo'] ?? '';   //平台内部订单号
+            $data['transactionId'] = $log['orderNo'] ?? '';    //三方订单号
+            $data['code'] = $log['status'];
+            $data['status'] = $log['status'] ?? '' == 'success' ? 1 : 0;
 
-        save_log('mkcpay', '验签结果:' . json_encode($checkSign));
-        if ($checkSign) {
-            $sign = 1;
-            $checkSign = 1;
-        } else {
-            $text = "sign error"; //签名失败 Signature failed
-            $gameoc = new GameOC();
-            $errorData = [
-                'OrderId' => $data['orderid'],
-                'Controller' => 'Notify',
-                'Method' => __METHOD__,
-                'Parameter' => $data['json'],
-                'Error' => $text,
-                'AddTime' => date('Y-m-d H:i:s', time())
+            save_log('mkcpay', '验签结果:' . json_encode($checkSign));
+            if ($checkSign) {
+                $sign = 1;
+                $checkSign = 1;
+            } else {
+                $text = "sign error"; //签名失败 Signature failed
+                $gameoc = new GameOC();
+                $errorData = [
+                    'OrderId' => $data['orderid'],
+                    'Controller' => 'Notify',
+                    'Method' => __METHOD__,
+                    'Parameter' => $data['json'],
+                    'Error' => $text,
+                    'AddTime' => date('Y-m-d H:i:s', time())
+                ];
+                $gameoc->PaynotifyLog()->insert($errorData);
+                exit($text);
+            }
+            $signCheck = [
+                'sign' => $sign,
+                'check' => $checkSign
             ];
-            $gameoc->PaynotifyLog()->insert($errorData);
-            exit($text);
-        }
-        $signCheck = [
-            'sign' => $sign,
-            'check' => $checkSign
-        ];
             save_log('mkcpay', '验签参数:' . json_encode($signCheck));
             $userDB = new UserDB();
-            $order = $userDB->getTableObject('T_UserChannelPayOrder')->where('OrderId',$data['orderid'])->find();
+            $order = $userDB->getTableObject('T_UserChannelPayOrder')->where('OrderId', $data['orderid'])->find();
             $data['realmoney'] = $order['RealMoney'];
-        (new \paynotify\PayNotify('OK'))->notify($data, $sign, $checkSign, $channel, $logname);
+            (new \paynotify\PayNotify('OK'))->notify($data, $sign, $checkSign, $channel, $logname);
         } catch (\Exception $ex) {
             save_log($logname, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
             exit('fail');
@@ -164,14 +157,14 @@ class PaySdk
             $sign = $header['digital-signature'] ?? '';
             $checkSign = $this->verify($params, $sign);
             $data['json'] = $params;
-            $json = json_decode($params,1);
+            $json = json_decode($params, 1);
             $log = $json['log'];
             $data['realmoney'] = $log['actualAmount'] ?? '';   //订单金额
             $data['orderid'] = $log['externalOrderNo'] ?? '';   //平台内部订单号
             $data['transactionId'] = $log['orderNo'] ?? '';    //三方订单号
             $data['code'] = $log['status'];
             $data['status'] = $log['status'] ?? '' == 'success' ? 1 : 0;
-            if($data['code'] == "failed"  || $data['code'] == "canceled"){
+            if ($data['code'] == "failed" || $data['code'] == "canceled") {
                 $data['status'] = '2';
             }
             save_log('mkcpay', '订单状态:----' . $data['status']);
