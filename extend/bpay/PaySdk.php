@@ -102,7 +102,7 @@ class PaySdk
 
         $publicKeyBase64 = "-----BEGIN PUBLIC KEY-----\n";
         $publicKeyBase64 .= wordwrap($publicKey, 64, "\n", true);
-        $publicKeyBase64 .= "\n-----BEGIN PUBLIC KEY-----\n";
+        $publicKeyBase64 .= "\n-----END PUBLIC KEY-----\n";
         //验证
         $payPublicKey = openssl_get_publickey($publicKeyBase64);
 
