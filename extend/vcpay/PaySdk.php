@@ -160,15 +160,15 @@ class PaySdk
             unset($params['sign']);
             unset($params['code']);
             unset($params['msg']);
-            $order = (new BankDB())->getTableRow('UserDrawBack', ['OrderNo' => $data['orderid']], '*');
-            $order['ChannelId'] = $order['ChannelID'] ?? 0;
-
-            $channel_all = (new MasterDB())->getTableRow('T_GamePayChannel', ['channelID' => $order['ChannelId']], '*');
-            if (empty($channel_all)) {
-                exit('fail:Channel Not Exist');
-            }
-            $channel = json_decode($channel_all['MerchantDetail'],true);
-            $channel['ChannelId'] = $channel_all['ChannelId'];
+//            $order = (new BankDB())->getTableRow('UserDrawBack', ['OrderNo' => $data['orderid']], '*');
+//            $order['ChannelId'] = $order['ChannelID'] ?? 0;
+//
+//            $channel_all = (new MasterDB())->getTableRow('T_GamePayChannel', ['channelID' => $order['ChannelId']], '*');
+//            if (empty($channel_all)) {
+//                exit('fail:Channel Not Exist');
+//            }
+//            $channel = json_decode($channel_all['MerchantDetail'],true);
+//            $channel['ChannelId'] = $channel_all['ChannelId'];
 
             $checksign             = $this->createSign($params,$channel['secret']);
 
