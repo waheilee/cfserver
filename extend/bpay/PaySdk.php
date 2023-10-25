@@ -57,7 +57,7 @@ class PaySdk
             'Pragma: no-cache'
         ];
         $result = $this->curlPostContent($apiUrl, $postData, $header);
-        save_log('bypay', '提交参数:' . json_encode($data) . ',接口返回信息：' . $result);
+        save_log('bpay', '提交参数:' . json_encode($data) . ',接口返回信息：' . $result);
         $res = json_decode($result, true);
         if (!isset($res['code']) || $res['code'] != "200") {
             $res['message'] = 'Http Request Invalid';
@@ -196,6 +196,7 @@ class PaySdk
             $merchantOrderNo = $params['merchantOrderNo'] ?? '';
             $orderNo = $params['orderNo'] ?? '';
             $sign = $params['sign'];
+            $data['json'] = json_encode($params);
             unset($params['sign']);
             $dataStr = $this->ascSort($params);
             $checkSign = $this->verify($dataStr, $sign, $publicKey);
@@ -216,7 +217,7 @@ class PaySdk
                     'OrderId' => $data['orderid'],
                     'Controller' => 'Notify',
                     'Method' => __METHOD__,
-                    'Parameter' => json_encode($params),
+                    'Parameter' => $data['json'],
                     'Error' => $text,
                     'AddTime' => date('Y-m-d H:i:s', time())
                 ];
@@ -268,6 +269,7 @@ class PaySdk
             $orderNo = $params['orderNo'] ?? '';
             $merchantOrderNo = $params['merchantOrderNo'] ?? '';
             $sign = $params['sign'];
+            $data['json'] = json_encode($params);
             unset($params['sign']);
             $dataStr = $this->ascSort($params);
             $checkSign = $this->verify($dataStr, $sign, $publicKey);
@@ -287,7 +289,7 @@ class PaySdk
                     'OrderId' => $data['orderid'],
                     'Controller' => 'Notify',
                     'Method' => __METHOD__,
-                    'Parameter' => json_encode($params),
+                    'Parameter' => $data['json'],
                     'Error' => $text,
                     'AddTime' => date('Y-m-d H:i:s', time())
                 ];
