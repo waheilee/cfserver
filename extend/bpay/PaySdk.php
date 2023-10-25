@@ -19,6 +19,11 @@ class PaySdk
 
     public function pay($param, $config = [])
     {
+        $mobile = rand(6, 9) . rand(100000000, 999999999);
+        $email = $mobile . '@gmail.com';
+        $firstname = 'pay';
+        $lastName = 'honey';
+
         $privateKey = $config['private_key'] ?? $this->getDefaultPrivateKey();
         $merchantNo = $config['merchant'] ?? '';
         $merchantOrderNo = trim($param['orderid']);
@@ -29,9 +34,7 @@ class PaySdk
         $goods = "iphone15";
         $notifyUrl = $config['notify_url'] ?? '';
         $apiUrl = $config['api_url'] ?? 'https://api.bpay.tv/api/v2/payment/order/create';
-//        $pageUrl = "https://www.xxx.com";
-//        $returnedParams = '回传参数';
-//        $extendedParams = 'payerFirstName^付款人姓|payerLastName^付款人名|payerEmail^付款人邮箱|payerPhone^付款人电话|payerCPF^付款人税号';
+        $extendedParams = "payerFirstName^$firstname|payerLastName^$lastName|payerEmail^$email|payerPhone^$mobile|payerCPF^$mobile";
         $data = [
             'merchantNo' => $merchantNo,
             'merchantOrderNo' => $merchantOrderNo,
@@ -40,7 +43,8 @@ class PaySdk
             'paymentType' => $paymentType,
             'paymentAmount' => $paymentAmount,
             'goods' => $goods,
-            'notifyUrl' => $notifyUrl
+            'notifyUrl' => $notifyUrl,
+            'extendedParams' => $extendedParams,
         ];
         $dataStr = $this->ascSort($data);
         $sign = $this->sign($dataStr, $privateKey);
@@ -105,7 +109,7 @@ class PaySdk
         return openssl_verify($data, base64_decode($sign), $payPublicKey, OPENSSL_ALGO_MD5);
     }
 
-    private function ascSort($data =[])
+    private function ascSort($data = [])
     {
         if (!empty($data)) {
             $p = ksort($data);
