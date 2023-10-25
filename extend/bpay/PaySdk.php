@@ -182,7 +182,7 @@ class PaySdk
 //            'merchantNo' => '3018220107001',
 //        )
         try {
-            $jsonData = json_decode($params, true);
+//            $jsonData = json_decode($params, true);
             $publicKey = $channel['public_key'] ?? $this->getDefaultPublicKey();
 //            $countryCode = $jsonData['countryCode'];
 //            $orderTime = $jsonData['orderTime'];
@@ -192,12 +192,12 @@ class PaySdk
 //            $currencyCode = $jsonData['currencyCode'];
 //            $returnedParams = $jsonData['returnedParams'];
 //            $merchantNo = $jsonData['merchantNo'];
-            $paymentStatus = $jsonData['paymentStatus'];
-            $merchantOrderNo = $jsonData['merchantOrderNo'] ?? '';
-            $orderNo = $jsonData['orderNo'] ?? '';
-            $sign = $jsonData['sign'];
-            unset($jsonData['sign']);
-            $dataStr = $this->ascSort($jsonData);
+            $paymentStatus = $params['paymentStatus'];
+            $merchantOrderNo = $params['merchantOrderNo'] ?? '';
+            $orderNo = $params['orderNo'] ?? '';
+            $sign = $params['sign'];
+            unset($params['sign']);
+            $dataStr = $this->ascSort($params);
             $checkSign = $this->verify($dataStr, $sign, $publicKey);
             $data['orderid'] = $merchantOrderNo;   //平台内部订单号
             $data['transactionId'] = $orderNo;    //三方订单号
@@ -216,7 +216,7 @@ class PaySdk
                     'OrderId' => $data['orderid'],
                     'Controller' => 'Notify',
                     'Method' => __METHOD__,
-                    'Parameter' => $params,
+                    'Parameter' => json_encode($params),
                     'Error' => $text,
                     'AddTime' => date('Y-m-d H:i:s', time())
                 ];
@@ -255,7 +255,7 @@ class PaySdk
 //        )
         try {
             $gameOC = new GameOC();
-            $jsonData = json_decode($params, true);
+//            $jsonData = json_decode($params, true);
             $publicKey = $channel['public_key'];
 //            $merchantNo = $jsonData['merchantNo'];
 //            $orderTime = $jsonData['orderTime'];
@@ -263,13 +263,13 @@ class PaySdk
 //            $currencyCode = $jsonData['currencyCode'];
 //            $countryCode = $jsonData['countryCode'];
 //            $transferTime = $jsonData['transferTime'];
-            $transferAmount = $jsonData['transferAmount'] ?? '';
-            $transferStatus = $jsonData['transferStatus'];
-            $orderNo = $jsonData['orderNo'] ?? '';
-            $merchantOrderNo = $jsonData['merchantOrderNo'] ?? '';
-            $sign = $jsonData['sign'];
-            unset($jsonData['sign']);
-            $dataStr = $this->ascSort($jsonData);
+            $transferAmount = $params['transferAmount'] ?? '';
+            $transferStatus = $params['transferStatus'];
+            $orderNo = $params['orderNo'] ?? '';
+            $merchantOrderNo = $params['merchantOrderNo'] ?? '';
+            $sign = $params['sign'];
+            unset($params['sign']);
+            $dataStr = $this->ascSort($params);
             $checkSign = $this->verify($dataStr, $sign, $publicKey);
             $data['realmoney'] = $transferAmount;   //订单金额
             $data['orderid'] = $merchantOrderNo;   //平台内部订单号
@@ -287,7 +287,7 @@ class PaySdk
                     'OrderId' => $data['orderid'],
                     'Controller' => 'Notify',
                     'Method' => __METHOD__,
-                    'Parameter' => $params,
+                    'Parameter' => json_encode($params),
                     'Error' => $text,
                     'AddTime' => date('Y-m-d H:i:s', time())
                 ];
