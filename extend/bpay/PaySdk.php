@@ -77,9 +77,9 @@ class PaySdk
     private function sign($data, $extra): string
     {
         // 私钥
-        $privateKeyBase64 = "-----BEGIN RSA PRIVATE KEY-----\n";
+        $privateKeyBase64 = "-----BEGIN PRIVATE KEY-----\n";
         $privateKeyBase64 .= wordwrap($extra, 64, "\n", true);
-        $privateKeyBase64 .= "\n-----END RSA PRIVATE KEY-----\n";
+        $privateKeyBase64 .= "\n-----END PRIVATE KEY-----\n";
         // 签名
         $merchantPrivateKey = openssl_get_privatekey($privateKeyBase64);
         openssl_sign($data, $signature, $merchantPrivateKey, OPENSSL_ALGO_MD5);
@@ -95,8 +95,12 @@ class PaySdk
      */
     private function verify($data, $sign, $publicKey)
     {
+
+        $publicKeyBase64 = "-----BEGIN PUBLIC KEY-----\n";
+        $publicKeyBase64 .= wordwrap($publicKey, 64, "\n", true);
+        $publicKeyBase64 .= "\n-----BEGIN PUBLIC KEY-----\n";
         //验证
-        $payPublicKey = openssl_get_publickey($publicKey);
+        $payPublicKey = openssl_get_publickey($publicKeyBase64);
 
         return openssl_verify($data, base64_decode($sign), $payPublicKey, OPENSSL_ALGO_MD5);
     }
