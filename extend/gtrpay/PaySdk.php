@@ -48,8 +48,8 @@ class PaySdk
         if (!empty($config['secret'])) {
             $this->secret = $config['secret'];
         }
-        if (!empty($config['apiurl'])) {
-            $this->api_url = $config['apiurl'];
+        if (!empty($config['api_url'])) {
+            $this->api_url = $config['api_url'];
         }
         $merchant = $this->merchant;
         $appid = $this->appid;
