@@ -148,15 +148,15 @@ class PaySdk
             $data['code'] = $params['trade_state'];
             $data['realmoney'] = $data['realmoney'] / 100;
             switch ($data['code']) {
-                case '1':
+                case 1:
                     //成功
                     $data['status'] = 1;
                     break;
-                case '2':
+                case 2:
                     //失败
                     $data['status'] = 2;
                     break;
-                case '3':
+                case 3:
                     //处理中
                     $data['status'] = 3;
                     break;
