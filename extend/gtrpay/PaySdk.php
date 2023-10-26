@@ -64,7 +64,7 @@ class PaySdk
 
         $data = [
             'mchId' => $merchant,
-            'passageId' => 101,
+            'passageId' => 24701,
             'orderAmount' => (float)$amount,
             'orderNo' => $orderid,
             'notifyUrl' => $notify_url,
