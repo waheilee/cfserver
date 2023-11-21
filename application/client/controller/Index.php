@@ -710,6 +710,7 @@ class Index extends Controller
         // save_log('tgpay','qingqiu参数');
        try {
             $params = Utility::request(['channelID', 'roleid', 'amount','ordertype','active', 'time', 'sign']);
+           save_log('allpay','所有支付请求参数'.json_encode($params));
             $UserID = $params["roleid"];
             $ChannelId = $params['channelID'];//111;
             $RealMoney = $params['amount'];//实际金额 对应表 masterdb.t_shopitem  RealMoney
