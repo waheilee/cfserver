@@ -67,7 +67,7 @@ class PaySdk
             'sign:' . $sign,
             'appKey:' . $appid,
         ];
-
+        save_log('mkcpay', '提交参数:' . json_encode($data));
         //{
         //    "result": {
         //        "orderNo": "r79903742490648129536",
