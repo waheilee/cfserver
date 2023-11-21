@@ -1195,6 +1195,7 @@ class Index extends Controller
                     return $this->payOrder();
                     break;
                 default:
+                    save_log('allpay','支付通道'.json_encode($channelcode));
                     $class = '\\'.strtolower($channelcode).'\PaySdk';
                     $data['code'] = 0;
                     $data['msg'] = 'success';
