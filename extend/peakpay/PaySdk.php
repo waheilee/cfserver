@@ -66,7 +66,7 @@ class PaySdk
             'countryCode'=>'BR',
             'currencyCode'=>'BRL',
             'merchantOrderId'=>$orderid,
-            'remark'=>$username,
+            'remark'=>$config['code'],
             'custId'=>$merchant,
             'type'=>'0101',
             'userName'=>$username,
@@ -106,8 +106,7 @@ class PaySdk
             $data['realmoney']     = $params['payAmt']??'';
             $data['transactionId'] = $params['order']??'';    //三方订单号
             $data['code']          = $params['orderStatus'];
-            $data['status']        = $params['orderStatus']??'' == '01' ? 1 : 0;
-
+            $data['status']        = $params['orderStatus'] === '01' ? 1 : 0;
             $data['realmoney']     = $data['realmoney']/100;
             //sign认证
             unset($params['sign']);
