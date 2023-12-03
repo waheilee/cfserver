@@ -35,7 +35,7 @@ class PaySdk
 
     public function pay($param, $config = [])
     {
-        
+
         if (isset($config['merchant']) && !empty($config['merchant'])) {
             $this->merchant = $config['merchant'];
         }
@@ -57,7 +57,7 @@ class PaySdk
         $username    = chr(rand(65,90)).chr(rand(97,122)).chr(rand(97,122)).chr(rand(97,122)).chr(rand(97,122)).chr(rand(97,122));
         $email       = $mobile.'@gmail.com';
         $timestamp   = time();
-        
+
         $amount = (int)$amount*100;
         $data = [
             'amount'=>$amount,
@@ -110,7 +110,7 @@ class PaySdk
             $data['realmoney']     = $data['realmoney']/100;
             //sign认证
             unset($params['sign']);
-            
+
             $checksign             = $this->createSign($params,$channel['secret']);
             (new \paynotify\PayNotify('000000'))->notify($data,$sign,$checksign,$channel,$logname);
         } catch (Exception $ex) {
