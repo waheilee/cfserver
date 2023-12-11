@@ -171,7 +171,7 @@ class PayNotify
                 $order_status =0;
                 $log_txt ='';
                 $order_coin = intval($order['iMoney']);
-                if($order['status']!=4){
+                if(in_array($order['status'],[0,2,3,5,100])){
                     $log_txt='订单状态不正确，非订单已经提交状态';
                     $gameoc = new GameOC();
                     $data =[
