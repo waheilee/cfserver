@@ -121,7 +121,7 @@ class Index extends Base
                     ->where('AccountID',$account_info['AccountID'])
                     ->where('PayTime', '<', date('Y-m-d 23:59:59'))
                     ->select();
-                if (!empty($extRecharge)) {
+                if (empty($extRecharge)) {
                     return $this->failJSON('Não foi recarregado hoje e não pode ser coletado.');
                 }
             }
