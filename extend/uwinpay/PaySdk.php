@@ -47,7 +47,7 @@ class PaySdk
         $name = $firstname . $lastName;
         $notifyUrl = $config['notify_url'] ?? '';
         $orderTime = time();
-        $pageUrl = $config['page_url'] ?? '';
+        $pageUrl = $config['redirect_url'] ?? '';
         $apiUrl = $config['api_url'] ?? 'https://br-api.uwinpay.com';
 
         $privateKey = $config['private_key'] ?? $this->getDefaultPrivateKey();
@@ -93,8 +93,6 @@ class PaySdk
      * @param null $data 待签名内容
      * @param string $extra 私钥数据（如果为单行，内容需要去掉RSA的标识符）
      * @return string               签名串
-     * @User: zhanghj
-     * @DateTime: 2023-09-27 9:41
      */
     private function sign($data, string $extra): string
     {
@@ -136,6 +134,9 @@ class PaySdk
             if ($p) {
                 $str = '';
                 foreach ($data as $k => $val) {
+                    if ($val == ''){
+                        continue;
+                    }
                     $str .= $k . '=' . $val . '&';
                 }
                 return rtrim($str, '&');
