@@ -69,10 +69,12 @@ class PaySdk
         $sign = $this->sign($dataStr, $privateKey);
         $data['sign'] = $sign;
         $postData = json_encode($data);
+        $header = [
+            'Content-Type:application/json;charset=UTF-8',
+        ];
+        $result = $this->curlPostContent($apiUrl . '/pay', $postData,$header);
 
-        $result = $this->curlPostContent($apiUrl . '/pay', $postData);
-
-        save_log('uwinpay', '提交参数:' . json_encode($data) . ',接口返回信息：' . $result);
+        save_log('uwinpay', '提交参数:' . $postData . ',接口返回信息：' . $result);
         $res = json_decode($result, true);
         if (!isset($res['code']) || $res['code'] != "200") {
             $res['message'] = 'Http Request Invalid';
@@ -148,17 +150,25 @@ class PaySdk
 
     private function curlPostContent($url, $postData = null, $header = [])
     {
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, $postData);
-        curl_setopt($curl, CURLOPT_HEADER, 0);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        $res = curl_exec($curl);
-        curl_close($curl);
+        $ch = curl_init();
+        if (substr_count($url, 'https://') > 0) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        }
+        curl_setopt($ch, CURLOPT_URL, $url);
+        if (!empty($postData)) {
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        }
+        if (!empty($header)) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+        }
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
+        $res = curl_exec($ch);
+        curl_close($ch);
         return $res;
     }
 
