@@ -740,9 +740,9 @@ class Index extends Controller
                 return Utility::apiReturn(102, '', 'The payment amount is greater than the maximum configured amount of the channel.');
             }
 
-            if (!$channel['Status']) {
-                return Utility::apiReturn(103, '', 'The Payment channel closed.');
-            }
+//            if (!$channel['Status']) {
+//                return Utility::apiReturn(103, '', 'The Payment channel closed.');
+//            }
             $channelcode = $channel['ChannelCode'];
             $save_data=[
                 'ChannelID'=> $ChannelId,
