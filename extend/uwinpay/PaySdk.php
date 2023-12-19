@@ -78,6 +78,16 @@ class PaySdk
         $res = json_decode($result, true);
         if (!isset($res['code']) || $res['code'] != "200") {
             $res['message'] = 'Http Request Invalid';
+        }elseif($res['code'] != "400"){
+            $res['message'] = '缺少请求参数';
+        }elseif($res['code'] != "401"){
+            $res['message'] = '签名错误';
+        }elseif($res['code'] != "406"){
+            $res['message'] = '订单号重复';
+        }elseif($res['code'] != "407"){
+            $res['message'] = '订单金额超出或低于限额';
+        }elseif($res['code'] != "408"){
+            $res['message'] = '账户余额不足';
         }
         $paymentUrl = '';
         if (is_array($res)) {
@@ -126,7 +136,7 @@ class PaySdk
         //验证
         $payPublicKey = openssl_get_publickey($publicKeyBase64);
 
-        return openssl_verify($data, base64_decode($sign), $payPublicKey, OPENSSL_ALGO_MD5);
+        return openssl_verify($data, base64_decode($sign), $payPublicKey, OPENSSL_ALGO_SHA256);
     }
 
     private function ascSort($data = [])
@@ -197,44 +207,39 @@ class PaySdk
      */
     public function notify($params, $header, $channel, $logName)
     {
-//        array (
-//            'orderNo' => '6012220116000004',
-//            'orderTime' => '2022-01-16 16:05:45',
-//            'orderAmount' => '100.00',
-//            'countryCode' => 'THA',
-//            'sign' => 'Cmkdx85RlWUgHTt27E21GyUg8yT74AW3ZujFghV4KmaSd93LCT4aDz0j/aUWf2jY2ZbMYOqbwnZZ7N63doGJuATdWzmmNSi6gRVnnCCvR5h12syuv8ab+j++NQbE2wc/wicqGF1c0D5eUwrEm414JC+aIq/ESe0/hWJ8wbaq87s=',
-//            'paymentTime' => '2022-01-16 16:05:58',
-//            'merchantOrderNo' => '1642323938',
-//            'paymentAmount' => '100.00',
-//            'currencyCode' => 'THB',
-//            'paymentStatus' => 'SUCCESS',
-//            'returnedParams' => '回传参数',
-//            'merchantNo' => '3018220107001',
-//        )
+//  {
+//  "amount": "100",
+//  "error_message": "",
+//  "merchant_code": "100000",
+//  "merchant_order_no": "20230330001654904935",
+//  "order_no": "PO1641112265354645504",
+//  "status": 2,
+//  "timestamp": 1680106820,
+//  "sign": "aUS5yirj6HlX8HGxbxbmX4Ufye5rGZi+ifTnZXVpLadaYtxkxuqtuAFPEke4vkvXlUiwmpYuy5/oP+1WFp6+4u3cr6dy7NvwRUWko/QkpkhlkoeP2pMO7XipOkfXkH1zR9uJ85EWfWRBSdEvE0N9ccAKeF9d58ykuREnmcYELcbUyYKqZcw//x9uKUL3SRyRDpO/rxQH/QJJqsWzuHh41qg2ZsyW3BecXO3muNfScd0RwXlD9jodSA4Ie0OUW/6VdK9DLaVBv4w4gu3ESNz+3AesPMvrD/brG9Cq78g91cYErGFag0rxfMFpuN+znmh/AtVmXfZRYPeXj7sVPmYqHw=="
+//  }
         try {
-//            $jsonData = json_decode($params, true);
+
             $publicKey = $channel['public_key'] ?? $this->getDefaultPublicKey();
-//            $countryCode = $jsonData['countryCode'];
-//            $orderTime = $jsonData['orderTime'];
-//            $orderAmount = $jsonData['orderAmount'];
-//            $paymentTime = $jsonData['paymentTime'];
-//            $paymentAmount = $jsonData['paymentAmount'];
-//            $currencyCode = $jsonData['currencyCode'];
-//            $returnedParams = $jsonData['returnedParams'];
-//            $merchantNo = $jsonData['merchantNo'];
-            $paymentStatus = $params['paymentStatus'];
-            $merchantOrderNo = $params['merchantOrderNo'] ?? '';
-            $orderNo = $params['orderNo'] ?? '';
+            $amount = $params['amount'];
+            $errorMessage = $params['error_message'];
+            $errorMessage = $params['merchant_code'];
+            $merchantOrderNo = $params['merchant_order_no'];
+            $orderNo = $params['order_no'];
+            $status = $params['status'];
+            $timestamp = $params['timestamp'];
             $sign = $params['sign'];
+
             $data['json'] = json_encode($params);
             unset($params['sign']);
             $dataStr = $this->ascSort($params);
             $checkSign = $this->verify($dataStr, $sign, $publicKey);
             $data['orderid'] = $merchantOrderNo;   //平台内部订单号
             $data['transactionId'] = $orderNo;    //三方订单号
-            $data['code'] = $paymentStatus;
-            $data['status'] = $paymentStatus ?? '' == 'SUCCESS' ? 1 : 0;
-
+            $data['code'] = $status;
+            $data['status'] = 0;
+            if ($status == 2){
+                $data['status'] = 1;
+            }
 
             save_log('uwinpay', '验签结果:' . json_encode($checkSign));
             if ($checkSign) {
@@ -258,7 +263,7 @@ class PaySdk
             $userDB = new UserDB();
             $order = $userDB->getTableObject('T_UserChannelPayOrder')->where('OrderId', $data['orderid'])->find();
             $data['realmoney'] = $order['RealMoney'];
-            (new \paynotify\PayNotify('SUCCESS'))->notify($data, $sign, $checkSign, $channel, $logName);
+            (new \paynotify\PayNotify('ok'))->notify($data, $sign, $checkSign, $channel, $logName);
         } catch (\Exception $ex) {
             save_log($logName, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
             exit('fail');
