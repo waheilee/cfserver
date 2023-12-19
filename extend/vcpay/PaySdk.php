@@ -20,17 +20,15 @@ class PaySdk
 
 
     private $api_url = '';
-    private $notify_url = '';
-    private $merchant = '';
+
     private $appid = '';
     private $secret = '';
-    private $ret_text = 'success';
+
 
 
     public function __construct()
     {
         $this->api_url = '';
-        $this->merchant = '';
         $this->secret = '';
     }
 
@@ -38,27 +36,23 @@ class PaySdk
     public function pay($param, $config = [])
     {
 
-        if (isset($config['merchant']) && !empty($config['merchant'])) {
-            $this->merchant = $config['merchant'];
+
+        if (!empty($config['app_id'])) {
+            $this->appid = $config['app_id'];
         }
-        if (isset($config['appid']) && !empty($config['appid'])) {
-            $this->appid = $config['appid'];
-        }
-        if (isset($config['secret']) && !empty($config['secret'])) {
+        if (!empty($config['secret'])) {
             $this->secret = $config['secret'];
         }
-        if (isset($config['apiurl']) && !empty($config['apiurl'])) {
-            $this->api_url = $config['apiurl'];
+        if (!empty($config['api_url'])) {
+            $this->api_url = $config['api_url'];
         }
-        $merchant = $this->merchant;
+
         $appid = $this->appid;
-        $orderid = trim($param['orderid']);
+        $orderId = trim($param['orderid']);
         $amount = sprintf('%.2f', $param['amount']);
-        $notify_url = trim($config['notify_url']);
-        $mobile = rand(6, 9) . rand(100000000, 999999999);
-        $username = chr(rand(65, 90)) . chr(rand(97, 122)) . chr(rand(97, 122)) . chr(rand(97, 122)) . chr(rand(97, 122)) . chr(rand(97, 122));
-        $email = $mobile . '@gmail.com';
-        $timestamp = time();
+        $notifyUrl = trim($config['notify_url']);
+
+
 
         $amount = (int)$amount * 100;
         $data = [
@@ -66,8 +60,8 @@ class PaySdk
             'nonce_str' => rand(10000000, 99999999) . sprintf('%.0f', floatval(explode(' ', microtime())[0]) * 1000),
             'trade_type' => $config['code'],
             'order_amount' => $amount,
-            'out_trade_no' => $orderid,
-            'notify_url' => $notify_url,
+            'out_trade_no' => $orderId,
+            'notify_url' => $notifyUrl,
             'back_url' => $config['redirect_url']
         ];
 
@@ -167,15 +161,6 @@ class PaySdk
             unset($params['sign']);
             unset($params['code']);
             unset($params['msg']);
-//            $order = (new BankDB())->getTableRow('UserDrawBack', ['OrderNo' => $data['orderid']], '*');
-//            $order['ChannelId'] = $order['ChannelID'] ?? 0;
-//
-//            $channel_all = (new MasterDB())->getTableRow('T_GamePayChannel', ['channelID' => $order['ChannelId']], '*');
-//            if (empty($channel_all)) {
-//                exit('fail:Channel Not Exist');
-//            }
-//            $channel = json_decode($channel_all['MerchantDetail'],true);
-//            $channel['ChannelId'] = $channel_all['ChannelId'];
 
             $checksign = $this->createSign($params, $channel['secret']);
 
