@@ -276,43 +276,39 @@ class PaySdk
      */
     public function outnotify($params, $header, $channel, $logName)
     {
-//        array (
-//            'orderNo' => '7015220116000002',
-//            'orderTime' => '2022-01-16 19:51:48',
-//            'transferStatus' => 'SUCCESS',
-//            'transferTime' => '2022-01-16 22:01:25',
-//            'countryCode' => 'THA',
-//            'orderAmout' => '15.00',
-//            'transferAmount' => '15.00',
-//            'sign' => 'V9Rv2UkjP5lwT/EwONd2//kXq8JqdvnDy/mbjhxwI10JV4syw64jdQZrJ1Sm4ts7njSNAbgdlzelkm3iBUqAorqLcoQrCjrgH567A7ZnFbeoSauqxw4bpK2mR9Jvuv/VzpfFgdEoAmp9KIlEAFHzTu4att+7x4jutTvaRV5SUmY=',
-//            'merchantOrderNo' => '1642337500',
-//            'currencyCode' => 'THB',
-//            'merchantNo' => '3018220107001',
-//        )
+//{
+//  "amount": "100",
+//  "error_message": "",
+//  "merchant_code": "100000",
+//  "merchant_order_no": "20230330001654904935",
+//  "order_no": "PO1641112265354645504",
+//  "status": 2,
+//  "timestamp": 1680106820,
+//  "sign": "aUS5yirj6HlX8HGxbxbmX4Ufye5rGZi+ifTnZXVpLadaYtxkxuqtuAFPEke4vkvXlUiwmpYuy5/oP+1WFp6+4u3cr6dy7NvwRUWko/QkpkhlkoeP2pMO7XipOkfXkH1zR9uJ85EWfWRBSdEvE0N9ccAKeF9d58ykuREnmcYELcbUyYKqZcw//x9uKUL3SRyRDpO/rxQH/QJJqsWzuHh41qg2ZsyW3BecXO3muNfScd0RwXlD9jodSA4Ie0OUW/6VdK9DLaVBv4w4gu3ESNz+3AesPMvrD/brG9Cq78g91cYErGFag0rxfMFpuN+znmh/AtVmXfZRYPeXj7sVPmYqHw=="
+//}
         try {
             $gameOC = new GameOC();
-//            $jsonData = json_decode($params, true);
-            $publicKey = $channel['public_key'];
-//            $merchantNo = $jsonData['merchantNo'];
-//            $orderTime = $jsonData['orderTime'];
-//            $orderAmout = $jsonData['orderAmout'];
-//            $currencyCode = $jsonData['currencyCode'];
-//            $countryCode = $jsonData['countryCode'];
-//            $transferTime = $jsonData['transferTime'];
-            $transferAmount = $params['transferAmount'] ?? '';
-            $transferStatus = $params['transferStatus'];
-            $orderNo = $params['orderNo'] ?? '';
-            $merchantOrderNo = $params['merchantOrderNo'] ?? '';
+            $publicKey = $channel['public_key'] ?? $this->getDefaultPublicKey();
+            $amount = $params['amount'];
+            $errorMessage = $params['error_message'];
+            $errorMessage = $params['merchant_code'];
+            $merchantOrderNo = $params['merchant_order_no'];
+            $orderNo = $params['order_no'];
+            $status = $params['status'];
+            $timestamp = $params['timestamp'];
             $sign = $params['sign'];
+
             $data['json'] = json_encode($params);
             unset($params['sign']);
             $dataStr = $this->ascSort($params);
             $checkSign = $this->verify($dataStr, $sign, $publicKey);
-            $data['realmoney'] = $transferAmount;   //订单金额
             $data['orderid'] = $merchantOrderNo;   //平台内部订单号
             $data['transactionId'] = $orderNo;    //三方订单号
-            $data['code'] = $transferStatus;
-            $data['status'] = $transferStatus ?? '' == 'SUCCESS' ? 1 : 0;
+            $data['code'] = $status;
+            $data['status'] = 0;
+            if ($status == 2){
+                $data['status'] = 1;
+            }
 
             save_log('uwinpay', '订单状态:----' . $data['status']);
             if ($checkSign) {
@@ -332,7 +328,7 @@ class PaySdk
                 exit($text);
             }
 
-            (new \paynotify\PayNotify('SUCCESS'))->outnotify($data, $sign, $checkSign, $channel, $logName);
+            (new \paynotify\PayNotify('ok'))->outnotify($data, $sign, $checkSign, $channel, $logName);
         } catch (\Exception $ex) {
             save_log($logName, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
             exit('fail');
