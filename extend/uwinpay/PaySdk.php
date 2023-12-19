@@ -70,7 +70,7 @@ class PaySdk
         $data['sign'] = $sign;
         $postData = json_encode($data);
 
-        $result = $this->curlPostContent($apiUrl.'/pay', $postData);
+        $result = $this->curlPostContent($apiUrl . '/pay', $postData);
 
         save_log('uwinpay', '提交参数:' . json_encode($data) . ',接口返回信息：' . $result);
         $res = json_decode($result, true);
@@ -88,21 +88,26 @@ class PaySdk
 
 
     /**
-     * 支付加密
-     * 验签数组 @param $data
-     * 密钥 @param $extra
-     * @return string
+     * @Notes:生成 sha256WithRSA 签名
+     * 提示：SPKI（subject public key identifier，主题公钥标识符）
+     * @param null $data 待签名内容
+     * @param string $extra 私钥数据（如果为单行，内容需要去掉RSA的标识符）
+     * @return string               签名串
+     * @User: zhanghj
+     * @DateTime: 2023-09-27 9:41
      */
-    private function sign($data, $extra): string
+    private function sign($data, string $extra): string
     {
         // 私钥
-        $privateKeyBase64 = "-----BEGIN PRIVATE KEY-----\n";
+        $privateKeyBase64 = "-----BEGIN RSA PRIVATE KEY-----\n";
         $privateKeyBase64 .= wordwrap($extra, 64, "\n", true);
-        $privateKeyBase64 .= "\n-----END PRIVATE KEY-----\n";
+        $privateKeyBase64 .= "\n-----END RSA PRIVATE KEY-----\n";
         // 签名
         $merchantPrivateKey = openssl_get_privatekey($privateKeyBase64);
-        openssl_sign($data, $signature, $merchantPrivateKey, OPENSSL_ALGO_MD5);
-        return base64_encode($signature);
+        openssl_sign($data, $signature, $merchantPrivateKey, OPENSSL_ALGO_SHA256);
+        $encryptedData = base64_encode($signature);
+        openssl_free_key($merchantPrivateKey);
+        return $encryptedData;
     }
 
     /**
