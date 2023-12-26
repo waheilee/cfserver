@@ -217,8 +217,11 @@ class PaySdk
 //  "timestamp": 1680106820,
 //  "sign": "aUS5yirj6HlX8HGxbxbmX4Ufye5rGZi+ifTnZXVpLadaYtxkxuqtuAFPEke4vkvXlUiwmpYuy5/oP+1WFp6+4u3cr6dy7NvwRUWko/QkpkhlkoeP2pMO7XipOkfXkH1zR9uJ85EWfWRBSdEvE0N9ccAKeF9d58ykuREnmcYELcbUyYKqZcw//x9uKUL3SRyRDpO/rxQH/QJJqsWzuHh41qg2ZsyW3BecXO3muNfScd0RwXlD9jodSA4Ie0OUW/6VdK9DLaVBv4w4gu3ESNz+3AesPMvrD/brG9Cq78g91cYErGFag0rxfMFpuN+znmh/AtVmXfZRYPeXj7sVPmYqHw=="
 //  }
+        //-1 支付失败
+        //0	待支付
+        //2	支付成功
+        //3	订单异常（只有代收有，比如用户支付金额与实际不符）
         try {
-            save_log('uwinpay', '回调参数:' . json_encode($params));
             $publicKey = $channel['public_key'] ?? $this->getDefaultPublicKey();
             $amount = $params['amount'];
             $errorMessage = $params['error_message'];
@@ -240,7 +243,7 @@ class PaySdk
             if ($status == 2){
                 $data['status'] = 1;
             }
-
+            save_log('uwinpay', '公钥:' . json_encode($publicKey));
             save_log('uwinpay', '验签结果:' . json_encode($checkSign));
             if ($checkSign) {
                 $sign = 1;
