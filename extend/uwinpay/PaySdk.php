@@ -218,7 +218,7 @@ class PaySdk
 //  "sign": "aUS5yirj6HlX8HGxbxbmX4Ufye5rGZi+ifTnZXVpLadaYtxkxuqtuAFPEke4vkvXlUiwmpYuy5/oP+1WFp6+4u3cr6dy7NvwRUWko/QkpkhlkoeP2pMO7XipOkfXkH1zR9uJ85EWfWRBSdEvE0N9ccAKeF9d58ykuREnmcYELcbUyYKqZcw//x9uKUL3SRyRDpO/rxQH/QJJqsWzuHh41qg2ZsyW3BecXO3muNfScd0RwXlD9jodSA4Ie0OUW/6VdK9DLaVBv4w4gu3ESNz+3AesPMvrD/brG9Cq78g91cYErGFag0rxfMFpuN+znmh/AtVmXfZRYPeXj7sVPmYqHw=="
 //  }
         try {
-            save_log('uwinpay', '配置参数:' . json_encode($channel));
+            save_log('uwinpay', '回调参数:' . json_encode($params));
             $publicKey = $channel['public_key'] ?? $this->getDefaultPublicKey();
             $amount = $params['amount'];
             $errorMessage = $params['error_message'];
