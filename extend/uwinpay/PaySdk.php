@@ -341,41 +341,4 @@ class PaySdk
     }
 
 
-    //验签
-    private static function verifyCopy($params, $returnSign,$publicKeyConfig){
-
-        if (!$params || !is_array($params))
-            return false;
-
-        $params['charset'] = "utf-8";
-        ksort($params);
-        $publicKeyHeader = "-----BEGIN PUBLIC KEY-----\n";
-        # TODO 公钥
-        $publicKeyContent = "";
-        $publicKeyContent = wordwrap($publicKeyConfig, 64, "\n", true);
-        $publicKeyEnd = "\n-----END PUBLIC KEY-----";
-
-        $publicKey = $publicKeyHeader . $publicKeyContent . $publicKeyEnd;
-
-        $keyStr = '';
-        foreach ($params as $key => $value) {
-            if (empty($keyStr))
-                $keyStr = $key . '=' . $value;
-            else
-                $keyStr .= '&' . $key . '=' . $value;
-        }
-
-        if (!$keyStr)
-            return false;
-
-        try {
-            $key = openssl_get_publickey($publicKey);
-
-            $ok = openssl_verify($keyStr,base64_decode($returnSign), $key, 'SHA256');
-            openssl_free_key($key);
-            return $ok;
-        } catch (\Exception $e) {
-            return false;
-        }
-    }
 }
