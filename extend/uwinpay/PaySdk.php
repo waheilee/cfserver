@@ -241,9 +241,13 @@ class PaySdk
             $data['transactionId'] = $orderNo;    //三方订单号
             $data['code'] = $status;
             $data['status'] = 0;
+            if ($status === 0){
+                $data['status'] = 1;
+            }
             if ($status == 2){
                 $data['status'] = 1;
             }
+
             save_log('uwinpay', '验签结果:' . json_encode($checkSign));
             if ($checkSign) {
                 $sign = 1;
