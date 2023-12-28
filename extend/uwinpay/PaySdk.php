@@ -237,7 +237,6 @@ class PaySdk
             unset($params['sign']);
             $dataStr = $this->ascSort($params);
             $checkSign = $this->verify($dataStr, $sign, $publicKey);
-            dump($checkSign);die();
             $data['orderid'] = $merchantOrderNo;   //平台内部订单号
             $data['transactionId'] = $orderNo;    //三方订单号
             $data['code'] = $status;
