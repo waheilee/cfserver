@@ -244,7 +244,6 @@ class PaySdk
             if ($status == 2){
                 $data['status'] = 1;
             }
-            save_log('uwinpay', '公钥:' . json_encode($publicKey));
             save_log('uwinpay', '验签结果:' . json_encode($checkSign));
             if ($checkSign) {
                 $sign = 1;
