@@ -12,6 +12,7 @@ use app\model\GameOC;
 use app\model\UserDB;
 use Utility\Utility;
 use think\facade\Cache;
+use function Couchbase\defaultDecoder;
 
 class PaySdk
 {
@@ -132,7 +133,7 @@ class PaySdk
 
         $publicKeyBase64 = "-----BEGIN PUBLIC KEY-----\n";
         $publicKeyBase64 .= wordwrap($publicKey, 64, "\n", true);
-        $publicKeyBase64 .= "\n-----END PUBLIC KEY-----\n";
+        $publicKeyBase64 .= "\n-----END PUBLIC KEY-----";
         //验证
         $payPublicKey = openssl_get_publickey($publicKeyBase64);
 
@@ -146,7 +147,7 @@ class PaySdk
             if ($p) {
                 $str = '';
                 foreach ($data as $k => $val) {
-                    if ($val == ''){
+                    if ($val === ''){
                         continue;
                     }
                     $str .= $k . '=' . $val . '&';
@@ -236,6 +237,7 @@ class PaySdk
             unset($params['sign']);
             $dataStr = $this->ascSort($params);
             $checkSign = $this->verify($dataStr, $sign, $publicKey);
+            dump($checkSign);die();
             $data['orderid'] = $merchantOrderNo;   //平台内部订单号
             $data['transactionId'] = $orderNo;    //三方订单号
             $data['code'] = $status;
@@ -335,6 +337,45 @@ class PaySdk
         } catch (\Exception $ex) {
             save_log($logName, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
             exit('fail');
+        }
+    }
+
+
+    //验签
+    private static function verifyCopy($params, $returnSign,$publicKeyConfig){
+
+        if (!$params || !is_array($params))
+            return false;
+
+        $params['charset'] = "utf-8";
+        ksort($params);
+        $publicKeyHeader = "-----BEGIN PUBLIC KEY-----\n";
+        # TODO 公钥
+        $publicKeyContent = "";
+        $publicKeyContent = wordwrap($publicKeyConfig, 64, "\n", true);
+        $publicKeyEnd = "\n-----END PUBLIC KEY-----";
+
+        $publicKey = $publicKeyHeader . $publicKeyContent . $publicKeyEnd;
+
+        $keyStr = '';
+        foreach ($params as $key => $value) {
+            if (empty($keyStr))
+                $keyStr = $key . '=' . $value;
+            else
+                $keyStr .= '&' . $key . '=' . $value;
+        }
+
+        if (!$keyStr)
+            return false;
+
+        try {
+            $key = openssl_get_publickey($publicKey);
+
+            $ok = openssl_verify($keyStr,base64_decode($returnSign), $key, 'SHA256');
+            openssl_free_key($key);
+            return $ok;
+        } catch (\Exception $e) {
+            return false;
         }
     }
 }
