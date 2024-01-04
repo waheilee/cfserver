@@ -115,7 +115,7 @@ class Index extends Base
                 }
             }
             //查看该用户今日是否有充值，没有充值则无法领取
-            if ($active_info['TodayNeedCharge'] == 1) {
+            if (isset($active_info['TodayNeedCharge']) && $active_info['TodayNeedCharge'] == 1) {
                 $userDB = new UserDB();
                 $extRecharge = $userDB->getTableObject('T_UserChannelPayOrder')
                     ->where('AccountID',$account_info['AccountID'])
