@@ -69,9 +69,12 @@ class PaySdk
             'Content-Type:application/json;charset=UTF-8',
         ];
         $data['sign'] = $this->createSign($data, $this->secret);
-
+        $beginTime = time();
+        save_log('vcpay', '开始请求api:'.$beginTime );
         $result = $this->curl_post_content($this->api_url . '/pay/save', json_encode($data), $header);
-
+        $endTime = time();
+        $time = $beginTime - $endTime;
+        save_log('vcpay', '结束请求api:'.$time);
         save_log('vcpay', '提交参数:' . json_encode($data) . ',接口返回信息：' . $result . '-----请求路径：' . $this->api_url);
         $res = json_decode($result, true);
         if (!isset($res['code'])) {
