@@ -316,6 +316,10 @@ class PaySdk
             if ($status == 2){
                 $data['status'] = 1;
             }
+            if ($status == '-1'){
+                $data['status'] = 2;
+            }
+
 
             save_log('uwinpay', '订单状态:----' . $data['status']);
             if ($checkSign) {
