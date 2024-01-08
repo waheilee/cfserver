@@ -81,7 +81,7 @@ class PaySdk
         //}
 
         $result = $this->curl_post_content($apiUrl, json_encode($data), $header);
-        save_log('mkcpay', '头部信息:' . json_encode($header) . '提交参数:' . json_encode($data) . ',接口返回信息：' . $result);
+
         $res = json_decode($result, true);
         $resultData = '';
         if (isset($res['result']) && $res['code'] == 200) {
@@ -124,7 +124,6 @@ class PaySdk
             $data['code'] = $log['status'];
             $data['status'] = $log['status'] ?? '' == 'success' ? 1 : 0;
 
-            save_log('mkcpay', '验签结果:' . json_encode($checkSign));
             if ($checkSign) {
                 $sign = 1;
                 $checkSign = 1;
