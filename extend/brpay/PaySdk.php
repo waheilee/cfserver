@@ -6,7 +6,7 @@
  * Time: 14:55
  */
 
-namespace ycfpay;
+namespace brpay;
 
 use app\model\GameOC;
 use app\model\UserDB;
@@ -78,10 +78,10 @@ class PaySdk
             if ($res['code'] == 1) {
                 $paymentUrl = $res['data']['pay_url'];
             } else {
-                save_log('ycfpay', '失败订单:' . $payOrderId . '订单状态：' . $res['code'] . '失败消息：' . $res['msg']);
+                save_log('brpay', '失败订单:' . $payOrderId . '订单状态：' . $res['code'] . '失败消息：' . $res['msg']);
             }
         } else {
-            save_log('ycfpay', '无同步失败订单:' . $payOrderId);
+            save_log('brpay', '无同步失败订单:' . $payOrderId);
         }
 
         return $paymentUrl;
@@ -186,7 +186,7 @@ class PaySdk
                 $data['status'] = 1;//
             }
 
-            save_log('ycfpay', '订单状态:----' . $data['status']);
+            save_log('brpay', '订单状态:----' . $data['status']);
             $checkSign = $this->createSign($params, $channel['secret']);
 
             (new \paynotify\PayNotify('OK'))->outnotify($data, $sign, $checkSign, $channel, $logName);
