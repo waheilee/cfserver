@@ -181,9 +181,9 @@ class PaySdk
             $data['orderid'] = $merchantOrderNo;   //平台内部订单号
             $data['transactionId'] = $orderNo;    //三方订单号
             $data['code'] = $status;
-            $data['status'] = 2;//默认给失败
+            $data['status'] = '2';//默认给失败
             if (isset($timestamp) && $status == 1) {
-                $data['status'] = 1;//
+                $data['status'] = '1';//
             }
 
             save_log('brpay', '订单状态:----' . $data['status']);
