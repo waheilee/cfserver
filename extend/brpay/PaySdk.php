@@ -177,6 +177,7 @@ class PaySdk
 
             $data['json'] = json_encode($params);
             unset($params['sign']);
+            unset($params['error_info']);
 
             $data['orderid'] = $merchantOrderNo;   //平台内部订单号
             $data['transactionId'] = $orderNo;    //三方订单号
