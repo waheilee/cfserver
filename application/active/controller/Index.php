@@ -119,6 +119,7 @@ class Index extends Base
                 $userDB = new UserDB();
                 $extRecharge = $userDB->getTableObject('T_UserChannelPayOrder')
                     ->where('AccountID',$account_info['AccountID'])
+                    ->where('Status',1)
                     ->where('PayTime', 'between time', [date('Y-m-d 00:00:00'),date('Y-m-d 23:59:59')])
                     ->select();
                 if (empty($extRecharge)) {
