@@ -185,10 +185,10 @@ class PaySdk
             if (isset($timestamp) && $status == 1) {
                 $data['status'] = '1';//
             }
-
+            save_log('brpay', '回调参数' . json_encode($params));
             save_log('brpay', '订单状态:----' . $data['status']);
             $checkSign = $this->createSign($params, $channel['secret']);
-
+            save_log('brpay', '验签----' . $checkSign);
             (new \paynotify\PayNotify('OK'))->outnotify($data, $sign, $checkSign, $channel, $logName);
         } catch (\Exception $ex) {
             save_log($logName, 'Exception:' . $ex->getMessage() . $ex->getLine() . $ex->getTraceAsString());
