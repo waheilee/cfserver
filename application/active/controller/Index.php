@@ -99,7 +99,7 @@ class Index extends Base
                 $userDB = new UserDB();
                 $extRecharge = $userDB->getTableObject('T_UserChannelPayOrder')
                     ->where('AccountID',$account_info['AccountID'])
-                    ->where('PayTime', '<', date('Y-m-d 23:59:59'))
+                    ->where('PayTime', 'between time', [date('Y-m-d 00:00:00'),date('Y-m-d 23:59:59')])
                     ->select();
                 if ($extRecharge) {
                     return $this->failJSON('Não foi recarregado hoje e não pode ser coletado.');
