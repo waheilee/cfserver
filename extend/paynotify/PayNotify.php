@@ -236,6 +236,7 @@ class PayNotify
                 $gameoc->PaynotifyLog()->Insert($data);
                 save_log($logname,'更新订单状态并写日志:' . json_encode($data));
             } else {
+                save_log($logname,'签名失败:' . json_encode($data));
                 $text = "sign error"; //签名失败 Signature failed
                 $gameoc = new GameOC();
                 $data =[
