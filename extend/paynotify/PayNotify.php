@@ -196,10 +196,12 @@ class PayNotify
                     //金币退回
                     $log_txt='第三方处理失败'.$status;
                     $order_status =5;
+                    save_log($logname,'订单状态:' . $order_status.'---'.$status);
                 }
                 else{
                     $order_status =3;
                     $log_txt='第三方处理中'.$status;
+                    save_log($logname,'订单状态:' . $order_status.'---'.$status);
                     exit($this->ret_text);
                 }
 
@@ -213,6 +215,7 @@ class PayNotify
                 $info = $db->updateByWhere(['OrderNo' => $orderid],$save_data);
 
                 if($order_status==5){
+                    save_log($logname,'更新订单状态:' . $order_status);
                     $realmoney = intval($order_coin/1000);
                     $res = $sendQuery->callback("CMD_MD_USER_DRAWBACK_MONEY_NEW", [$order['AccountID'], 2, $orderid, $realmoney, $order_coin,$order['DrawBackWay'],$order['FreezonMoney'],$order['CurWaged'],$order['NeedWaged']]);
                     $res = unpack("Cint", $res)['int'];
