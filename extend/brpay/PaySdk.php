@@ -137,13 +137,14 @@ class PaySdk
             $secretKey = $channel['secret'] ?? '';
             $orderId = $params['orderid'];
             $returnCode = $params['returncode'];
+            $transactionId = $params['transaction_id'];
             $sign = $params['sign'];
 
             $data['json'] = json_encode($params);
             unset($params['sign']);
 
             $data['orderid'] = $orderId;   //平台内部订单号
-            $data['transactionId'] = $params;    //三方订单号
+            $data['transactionId'] = $transactionId;    //三方订单号
             $data['code'] = $returnCode;
             $data['status'] = $returnCode ?? '';
 
