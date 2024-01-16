@@ -217,7 +217,15 @@ class sendQuery
         $socket->request($in_head, $this->in_stream->data);
     }
 
-
+    public function SE_GIFT_CARD_GET($socket, $iRoleID, $RealMoney, $dm) {
+        //$this->in_stream = new PHPStream();
+        $this->in_stream->WriteULong($iRoleID);
+        $this->in_stream->WriteINT64($RealMoney);
+        $this->in_stream->WriteINT64($dm);
+        $in_head = $this->comm->MakeSendHead(10008, $this->in_stream->len, 0, REQ_OM, REQ_DC);
+        $in = $this->in_stream->data;
+        $socket->request($in_head, $in);
+    }
 
 }
 

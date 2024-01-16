@@ -139,7 +139,12 @@ class Index extends Base
             }
 
             $sendQuery = new  sendQuery();
-            $res = $sendQuery->callback("CMD_MD_SYSTEM_MAILv2", [0, $account_info['AccountID'], 8, 9, $active_info['Amount'] * 1000, 0, $active_info['Wage'] * 10, 0, 1, $active_info['ActiveName'], $active_info['Descript'], '', '', '']);
+            if (config('se_gift_card_get') == 1){
+                $res = $sendQuery->callback("SE_GIFT_CARD_GET", [$account_info['AccountID'], $active_info['Amount'] * 1000, $active_info['Wage'] * 10]);
+
+            }else{
+                $res = $sendQuery->callback("CMD_MD_SYSTEM_MAILv2", [0, $account_info['AccountID'], 8, 9, $active_info['Amount'] * 1000, 0, $active_info['Wage'] * 10, 0, 1, $active_info['ActiveName'], $active_info['Descript'], '', '', '']);
+            }
             $retcode = unpack('Lint', $res)['int'];
             if ($retcode == 0) {
                 $gamedb = new GameOC();
