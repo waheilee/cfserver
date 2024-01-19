@@ -119,13 +119,14 @@ class PaySdk
     //回调地址 /client/Pay_Notify/templatepay_outnotify
     public function outnotify($params, $header, $channel, $logname)
     {
-
         try {
             $gameoc = new GameOC();
             //参数
             $publicKeyConfig = $channel['public_key'];
+
             $sign = $header['digital-signature'] ?? '';
-            $checkSign = $this->verify($params, $sign, $publicKeyConfig);
+            $checkSign = $this->verify(json_encode($params), $sign, $publicKeyConfig);
+            dump($checkSign);die();
             $data['json'] = $params;
             $json = json_decode($params, 1);
             $log = $json['log'];
@@ -226,6 +227,6 @@ class PaySdk
         $publicKeyPem .= "\n-----END PUBLIC KEY-----\n";
         $publicKey = PublicKey::fromPem($publicKeyPem);
         $signature = Signature::fromBase64($sig);
-        return Ecdsa::verify($data, $signature, $publicKey);
+        return Ecdsa::verify(trim($data), $signature, $publicKey);
     }
 }
