@@ -226,6 +226,6 @@ class PaySdk
         $publicKeyPem .= "\n-----END PUBLIC KEY-----\n";
         $publicKey = PublicKey::fromPem($publicKeyPem);
         $signature = Signature::fromBase64($sig);
-        return Ecdsa::verify(trim($data), $signature, $publicKey);
+        return Ecdsa::verify($data, $signature, $publicKey);
     }
 }
