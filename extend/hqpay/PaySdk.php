@@ -21,37 +21,13 @@ use EllipticCurve\Signature;
 class PaySdk
 {
 
-    private $appid;
-
-    private $apiUrl;
-    private $privateKey;
-
-
-    public function __construct()
-    {
-        $this->privateKey = '';
-        $this->appid = '';
-        $this->apiUrl = 'https://doc.mkcpay.com/api/pay/v1/mkcPay/createBrCode';
-    }
-
 
     public function pay($param, $config = [])
     {
 
-        if (!empty($config['appid'])) {
-            $this->appid = $config['appid'];
-        }
-
-        if (!empty($config['apiurl'])) {
-            $this->apiUrl = $config['apiurl'];
-        }
-        if (!empty($config['private_key'])) {
-            $this->privateKey = $config['private_key'];
-        }
-
-
-        $apiUrl = $this->apiUrl;
-        $appid = $this->appid;
+        $apiUrl = $config['apiurl'] ?? 'https://api.bz.hqpayglobal.com';
+        $appid = $config['appid'] ?? '';
+        $privateKey = $config['private_key'] ?? '';
         $orderId = (string)$param['orderid'];
         $amount = (int)$param['amount'] * 100;
 
@@ -61,26 +37,14 @@ class PaySdk
         ];
 
         $dataMd5 = $this->ksrotArrayMd5($data);
-        $sign = $this->encry($dataMd5,$this->privateKey);
+        $sign = $this->encry($dataMd5, $privateKey);
         $header = [
             'Content-Type: application/json; charset=utf-8',
             'sign:' . $sign,
             'appKey:' . $appid,
         ];
-        save_log('mkcpay', '提交参数:' . json_encode($data));
-        //{
-        //    "result": {
-        //        "orderNo": "r79903742490648129536",
-        //        "pictureUrl": "https://payment.kirinpays.com/upipay/home?orderId=20230925065106G01P7586942666&amount=20&returnUrl=https://payment.kirinpays.com/upipay/success&qrcode=00020126920014br.gov.bcb.pix2570qrcodes.sulcredi.coop.br/v2/v3/at/e6f382a0-0950-44d5-b03c-cc6d78dc32ff5204000053039865802BR5912VIATECH%20LTDA6009SAO%20PAULO62070503***63040B3B",
-        //        "createTime": 1695635466892,
-        //        "code": "00020126920014br.gov.bcb.pix2570qrcodes.sulcredi.coop.br/v2/v3/at/e6f382a0-0950-44d5-b03c-cc6d78dc32ff5204000053039865802BR5912VIATECH LTDA6009SAO PAULO62070503***63040B3B"
-        //    },
-        //    "success": true,
-        //    "message": "success",
-        //    "code": 200
-        //}
-
-        $result = $this->curl_post_content($apiUrl, json_encode($data), $header);
+        save_log('hqpay', '提交参数:' . json_encode($data));
+        $result = $this->curl_post_content($apiUrl . '/pay/v1/mkcPay/createBrCode', json_encode($data), $header);
 
         $res = json_decode($result, true);
         $resultData = '';
@@ -173,7 +137,7 @@ class PaySdk
             if ($data['code'] == "failed" || $data['code'] == "canceled") {
                 $data['status'] = '2';
             }
-            save_log('mkcpay', '订单状态:----' . $data['status']);
+            save_log('hqpay', '订单状态:----' . $data['status']);
             //            $checkSign = $this->verify($data['json'], $sign);
             if ($checkSign) {
                 $sign = 1;
@@ -236,7 +200,7 @@ class PaySdk
     /**
      * 加密
      */
-    public function encry($data,$privateKeyConfig)
+    public function encry($data, $privateKeyConfig)
     {
         //$key = 'MHUCAQEEIRgDFg6d7/rz9qBOiFnTyLCT4p6yw3fhQR+qKmsJpTMjxKAHBgUrgQQACqFEA0IABL7v4UTuEF9d24QPZJJVv7d+QEJXdd9JfmvFKn3ofIsqRcyPkIDK3VTrl6qEa86YAT5ZN05puDj2J689L/6wIgo=';
 
