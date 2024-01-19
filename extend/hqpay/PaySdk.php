@@ -43,9 +43,9 @@ class PaySdk
             'sign:' . $sign,
             'appKey:' . $appid,
         ];
-        save_log('hqpay', '提交参数:' . json_encode($data));
+        save_log('hqpay', '提交参数:' . json_encode($data).'--头部信息--：'. json_encode($header));
         $result = $this->curl_post_content($apiUrl . '/pay/v1/mkcPay/createBrCode', json_encode($data), $header);
-
+        save_log('hqpay', '返回参数:' . $result);
         $res = json_decode($result, true);
         $resultData = '';
         if (isset($res['result']) && $res['code'] == 200) {
