@@ -123,14 +123,12 @@ class PaySdk
             $gameoc = new GameOC();
             //参数
             $publicKeyConfig = $channel['public_key'];
-
             $sign = $header['digital-signature'] ?? '';
-            $checkSign = $this->verify(json_encode($params), $sign, $publicKeyConfig);
+            $checkSign = $this->verify($params, $sign, $publicKeyConfig);
 
-            $data['json'] = json_encode($params);
-//            $json = json_decode($params, 1);
-
-            $log = $params['log'];
+            $data['json'] = $params;
+            $json = json_decode($params, 1);
+            $log = $json['log'];
             $data['realmoney'] = $log['actualAmount'] ?? '';   //订单金额
             $data['orderid'] = $log['externalOrderNo'] ?? '';   //平台内部订单号
             $data['transactionId'] = $log['orderNo'] ?? '';    //三方订单号
