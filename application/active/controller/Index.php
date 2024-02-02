@@ -127,6 +127,16 @@ class Index extends Base
                 }
             }
 
+            $NeedMinChargeMoney = (new UserDB())->getTableObject('T_UserChannelPayOrder')
+                ->where('AccountID',$account_info['AccountID'])
+                ->where('Status',1)
+//                    ->where('PayTime', 'between time', [date('Y-m-d 00:00:00'),date('Y-m-d 23:59:59')])
+                ->sum('RealMoney');
+            //用户累计充值小于某个值时，无法领取
+            if (isset($active_info['NeedMinChargeMoney']) && $active_info['NeedMinChargeMoney'] > $NeedMinChargeMoney) {
+                return $this->failJSON('Recarga acumulada abaixo de'.$active_info['NeedMinChargeMoney'].', incapaz de reivindicar.');
+            }
+
             $strsql = 'SELECT count(1) as total  FROM [OM_GameOC].[dbo].[T_GiftCardReceive] where ActiveId=' . $activeId . ' and RoleId=' . $account_info['AccountID'];
             $receivelog = $gameoc->setTable('T_GiftCardReceive')->getTableQuery($strsql);
 
