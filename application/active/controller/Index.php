@@ -133,7 +133,7 @@ class Index extends Base
 //                    ->where('PayTime', 'between time', [date('Y-m-d 00:00:00'),date('Y-m-d 23:59:59')])
                 ->sum('RealMoney');
             //用户累计充值小于某个值时，无法领取
-            if (isset($active_info['NeedMinChargeMoney']) && $active_info['NeedMinChargeMoney'] > $NeedMinChargeMoney) {
+            if (isset($active_info['MinRecharge']) && $active_info['MinRecharge'] > $NeedMinChargeMoney) {
                 return $this->failJSON('Recarga acumulada abaixo de'.$active_info['NeedMinChargeMoney'].', incapaz de reivindicar.');
             }
 
