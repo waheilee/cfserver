@@ -134,7 +134,7 @@ class Index extends Base
                 ->sum('RealMoney');
             //用户累计充值小于某个值时，无法领取
             if (isset($active_info['MinRecharge']) && $active_info['MinRecharge'] > $NeedMinChargeMoney) {
-                return $this->failJSON('Recarga acumulada abaixo de'.$active_info['MinRecharge'].', incapaz de reivindicar.');
+                return $this->failJSON('Recarga acumulada abaixo de '.$active_info['MinRecharge'].', incapaz de reivindicar.');
             }
 
             $strsql = 'SELECT count(1) as total  FROM [OM_GameOC].[dbo].[T_GiftCardReceive] where ActiveId=' . $activeId . ' and RoleId=' . $account_info['AccountID'];
